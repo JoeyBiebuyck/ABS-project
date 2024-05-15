@@ -51,7 +51,7 @@ class Grid(object):  # het logische grid
             self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
             self.logic_grid[x][y].agent = agent
 
-    def update_agents(self, new_agents, old_agents): # functie die kapotte agents verwijderd en toevoegd
+    def update_agents(self, new_agents, old_agents): # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
         for agent in old_agents:
             self.agents.remove(agent)
