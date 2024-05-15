@@ -140,10 +140,10 @@ class Position(object):
         self.loading_dock = None
         self.item = None
 
-    def adjacent(pos1, pos2):
-        x1, y1 = pos1
-        x2, y2 = pos2
-        return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
+def adjacent(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
 
 
 if __name__ == "__main__":
