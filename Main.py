@@ -154,6 +154,12 @@ def generate_positions(lijst_van_producten, grid_size):
         dict[product] = (x, y)
     return dict
 
+def generate_order(lijst_van_producten, length_of_order=6):
+    order = []
+    for _ in range(length_of_order):
+        order.append(random.choice(lijst_van_producten))
+    return order
+
 
 if __name__ == "__main__":
     logic_grid = Grid({}, 5)
