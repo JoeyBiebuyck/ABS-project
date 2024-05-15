@@ -55,6 +55,7 @@ class Grid(object):  # het logische grid
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(10)
+        self.size = size
 
     def find(self, item_name): # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
@@ -64,7 +65,7 @@ class Grid(object):  # het logische grid
         for agent in self.agents:
             other_agents_list = self.agents.remove(agent)
             agent.other_agents = other_agents_list
-            agent.starting_position = (current_starting_pos, 0)
+            agent.starting_position = (current_starting_pos, self.size)
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
@@ -144,6 +145,14 @@ def adjacent(pos1, pos2):
     x1, y1 = pos1
     x2, y2 = pos2
     return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
+
+def generate_positions(lijst_van_producten, grid_size):
+    dict = {}
+    for product in lijst_van_producten:
+        x = random.randint(0, grid_size-1)
+        y = random.randint(0, grid_size-2)  # onderste rij is gereserveerd voor load docks
+        dict[product] = (x, y)
+    return dict
 
 
 if __name__ == "__main__":
