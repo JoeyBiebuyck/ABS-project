@@ -2,6 +2,7 @@ from enum import Enum
 import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
+import random
 
 
 class GridUI(tk.Tk):  # voor de visualisatie
@@ -24,10 +25,11 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, cell_size=30, laadplatformen=2, nr_of_agents=2):
-        self.agents = []  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
-        self.empty_item = Item()
-        self.logic_grid = np.array([np.array([self.empty_item for _ in range(size)]) for _ in range(size)])  # TODO: moet gepopulate worden met de agenten, laadplekken en voorwerpen
+        self.standard_position = Position()
+        self.logic_grid = np.array([np.array([self.standard_position for _ in range(size)]) for _ in range(size)])
+        self.grid_ui = GridUI(10)
 
     def find(self, item_name): # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
@@ -42,16 +44,18 @@ class Grid(object):  # het logische grid
             current_starting_pos += 1
 
     def populate_grid(self): # vul de grid met alle agenten, items en loading docks
-        for key, value in self.items_to_pos_dict.items():
+        for key, value in self.items_to_pos_dict.items(): # populate de items
             x, y = value
-            self.logic_grid[x][y] = key
-        for agent in self.agents:
+            self.logic_grid[x][y].item = key
+        for agent in self.agents: # populate de laadplekken en agenten
             x, y = agent.starting_position
-            self.logic_grid[x][y] = Loading_dock(agent, agent.starting_position)
+            self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
+            self.logic_grid[x][y].agent = agent
 
 class Agent(object):
-    def __init__(self, capacity=2):
+    def __init__(self, grid, capacity=2):
         self.goals = []
+        self.grid = grid
         self.path = None
         self.available = None
         self.other_agents = None
@@ -59,7 +63,18 @@ class Agent(object):
         self.current_position = None
 
     def choose_item(self):
-        self.goals.append()
+        item = random.choice(self.available) # verander hier de keuze methode
+        self.available.remove(item)
+        self.goals.append(item)
+        for agent in self.other_agents:
+            agent.available.remove(item)
+
+    def move(self, position):
+        if adjacent(self.current_position, position) and self.grid.logic_grid.agent is None:
+            x_curr, y_curr = self.current_position
+            x_new, y_new = position
+            self.grid.logic_grid[x_curr][y_curr].agent = None
+            self.grid.logic_grid[x_new][y_curr].agent = self
 
 
 class Item(object):
@@ -72,8 +87,18 @@ class Loading_dock(object):
         self.agent = agent
         self.position = position
 
+class Position(object):
+    def __init__(self):
+        self.agent = None
+        self.loading_dock = None
+        self.item = None
+
+def adjacent(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
 
 
 if __name__ == "__main__":
-    grid_ui = GridUI(10)
-    grid_ui.mainloop()
+    logic_grid = Grid({}, 5)
+    logic_grid.grid_ui.mainloop()
