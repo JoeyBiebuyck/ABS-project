@@ -27,8 +27,7 @@ class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, cell_size=30, laadplatformen=2, nr_of_agents=2):
         self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
-        self.standard_position = Position()
-        self.logic_grid = np.array([np.array([self.standard_position for _ in range(size)]) for _ in range(size)])
+        self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(10)
 
     def find(self, item_name): # functie om te vinden waar een item is in de grid
@@ -52,14 +51,35 @@ class Grid(object):  # het logische grid
             self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
             self.logic_grid[x][y].agent = agent
 
+    def update_agents(self, new_agents, old_agents): # functie die kapotte agents verwijderd en toevoegd
+        starting_positions = []
+        for agent in old_agents:
+            self.agents.remove(agent)
+            x_curr, y_curr = agent.current_position
+            x_starting, y_starting = agent.starting_position
+            starting_positions.append(agent.starting_position)
+            self.logic_grid[x_curr][y_curr].agent = None
+            self.logic_grid[x_starting][y_starting].loading_dock = None
+        for agent in new_agents:
+            self.agents.append(agent)
+            if not len(starting_positions) == 0:
+                agent.starting_position = starting_positions.pop()
+                x, y = agent.starting_position
+                self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
+                agent.current_position = agent.starting_position # pas hier de positie aan als de agent niet begint op de loading dock
+        for agent in self.agents:
+            other_agents = self.agents.remove(agent)
+            agent.other_agents = other_agents
+
 class Agent(object):
-    def __init__(self, grid, capacity=2):
+    def __init__(self, grid, strategy="random", capacity=2): # TODO: maak het zodat je gemakkelijk strategies kan veranderen
         self.goals = []
+        self.strategy = strategy
         self.grid = grid
         self.path = None
         self.available = None
         self.other_agents = None
-        self.starting_position = None  # is dezelfde locatie als het laadplatform
+        self.starting_position = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position = None
 
     def choose_item(self):
@@ -78,7 +98,8 @@ class Agent(object):
 
 
 class Item(object):
-    def __init__(self, weight=0, height=0, width=0, depth=0):
+    def __init__(self, name, weight=0, height=0, width=0, depth=0):
+        self.name = name
         self.weight = weight
         self.volume = height * width * depth
 
@@ -101,4 +122,6 @@ def adjacent(pos1, pos2):
 
 if __name__ == "__main__":
     logic_grid = Grid({}, 5)
+    logic_grid.init_agents()
+    logic_grid.populate_grid()
     logic_grid.grid_ui.mainloop()
