@@ -13,8 +13,34 @@ class GridUI(tk.Tk):  # voor de visualisatie
         self.canvas = tk.Canvas(self, width=size * cell_size, height=size * cell_size)
         self.canvas.pack()
         self.draw_grid()
+        self.images = {}  # als dictionary initialiseren
 
-    def draw_grid(self):
+    def add_image_to_grid(self, row, col, image_path):
+
+        if row < 0 or row >= self.size or col < 0 or col >= self.size:
+            print("Invalid grid position.")
+            return
+        x0 = col * self.cell_size
+        y0 = row * self.cell_size
+        if (row, col) in self.images:
+            self.canvas.delete(self.images[(row, col)])
+        self.images[(row, col)] = tk.PhotoImage(file=image_path)
+        # tot nu toe kunnen we die afbeelding aan de grid toevoegen maar we moeten die nog scalen tot een grid cell
+
+        original_image = tk.PhotoImage(file=image_path)
+        # Hier berekenen we de scaling factors om de afbeelding te fitten in  de cell net zoals gedaan in OOP taak
+        scale_x = self.cell_size / original_image.width()
+        scale_y = self.cell_size / original_image.height()
+
+        # De kleinste van de scales wordt gebruikt om een aspect ratio te behouden
+        scale_factor = min(scale_x, scale_y)
+
+        # Nu kan er gemakkelijk worden genormaliseerd
+        resized_image = original_image.subsample(int(1 / scale_factor))
+        self.images[(row, col)] = resized_image
+        self.canvas.create_image(x0 + self.cell_size // 2, y0 + self.cell_size // 2, image=resized_image)
+
+    def draw_grid(self, images=None):
         for i in range(self.size):
             for j in range(self.size):
                 x0 = j * self.cell_size
@@ -114,10 +140,10 @@ class Position(object):
         self.loading_dock = None
         self.item = None
 
-def adjacent(pos1, pos2):
-    x1, y1 = pos1
-    x2, y2 = pos2
-    return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
+    def adjacent(pos1, pos2):
+        x1, y1 = pos1
+        x2, y2 = pos2
+        return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
 
 
 if __name__ == "__main__":
@@ -125,3 +151,7 @@ if __name__ == "__main__":
     logic_grid.init_agents()
     logic_grid.populate_grid()
     logic_grid.grid_ui.mainloop()
+
+    grid_ui = GridUI(10)
+    grid_ui.add_image_to_grid(2, 3, "download.png")
+    grid_ui.mainloop()
