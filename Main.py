@@ -76,11 +76,11 @@ class Agent(object):
         self.goals = []
         self.strategy = strategy
         self.grid = grid
-        self.path = None
-        self.available = None
-        self.other_agents = None
+        self.path = []
+        self.available = []
+        self.other_agents = []
         self.starting_position = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
-        self.current_position = None
+        self.current_position = (-1, -1) # filler positie
 
     def choose_item(self):
         item = random.choice(self.available) # verander hier de keuze methode
