@@ -5,6 +5,10 @@ import tkinter as tk
 import random
 
 
+def random_action(list_of_items):
+    return random.choice(list_of_items)
+
+
 class GridUI(tk.Tk):  # voor de visualisatie
     def __init__(self, size, cell_size=30):
         super().__init__()
@@ -25,10 +29,10 @@ class GridUI(tk.Tk):  # voor de visualisatie
         if (row, col) in self.images:
             self.canvas.delete(self.images[(row, col)])
         self.images[(row, col)] = tk.PhotoImage(file=image_path)
-        # tot nu toe kunnen we die afbeelding aan de grid toevoegen maar we moeten die nog scalen tot een grid cell
+        # tot nu toe kunnen we die afbeelding aan de grid toevoegen, maar we moeten die nog scalen tot een grid cell
 
         original_image = tk.PhotoImage(file=image_path)
-        # Hier berekenen we de scaling factors om de afbeelding te fitten in  de cell net zoals gedaan in OOP taak
+        # Hier berekenen we de scaling factors om de afbeelding te fitten in de cell net zoals gedaan in OOP taak
         scale_x = self.cell_size / original_image.width()
         scale_y = self.cell_size / original_image.height()
 
@@ -51,10 +55,10 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 
 class Grid(object):  # het logische grid
-    def __init__(self, item_to_pos_dict, size, laadplatformen=2, nr_of_agents=2):
-        self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+    def __init__(self, item_to_pos_dict, size, strategy=random_action, laadplatformen=2, nr_of_agents=2):
+        self.agents = [Agent(self, strategy) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
-        self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
+        self.logic_grid: np.ndarray[np.ndarray[Position]] = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size)
         self.size = size
         self.init_on_curr_pos = True    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
@@ -125,19 +129,19 @@ class Grid(object):  # het logische grid
 
 
 class Agent(object):
-    def __init__(self, grid, strategy="random", capacity=2):  # TODO: maak het zodat je gemakkelijk strategies kan veranderen
-        self.goals = []
+    def __init__(self, grid, strategy, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+        self.goals: list[Item] = []
         self.strategy = strategy
-        self.grid = grid
+        self.grid: Grid = grid
         self.path = []
-        self.available = []
-        self.other_agents = []
-        self.other_agents_choices = []
-        self.starting_position = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
-        self.current_position = (-1, -1)  # filler positie
+        self.available: list[Item] = []
+        self.other_agents: list[Agent] = []
+        self.other_agents_choices: list[Item] = []
+        self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
+        self.current_position: (int, int) = (-1, -1)  # filler positie
 
     def choose_item(self):
-        item = random.choice(self.available)  # verander hier de keuze methode
+        item = self.strategy(self.available)  # verander hier de keuze methode
         self.available.remove(item)
         self.goals.append(item)
         for agent in self.other_agents:
@@ -145,9 +149,9 @@ class Agent(object):
             agent.other_agents_choices.append(item)
 
     def move(self, position):
-        if adjacent(self.current_position, position) and self.grid.logic_grid.agent is None:
+        new_row, new_col = position
+        if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
             curr_row, curr_col = self.current_position
-            new_row, new_col = position
             self.grid.logic_grid[curr_row][curr_col].agent = None
             self.grid.logic_grid[new_row][new_col].agent = self
 
@@ -209,6 +213,9 @@ def my_print(item):
     for y in range(row):
         for x in range(col):
             print("current coordinate = ", (y, x))
+
+
+
 
 
 if __name__ == "__main__":
