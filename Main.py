@@ -15,6 +15,8 @@ class GridUI(tk.Tk):  # voor de visualisatie
         self.draw_grid()
         self.images = {}  # als dictionary initialiseren
 
+        #self.canvas.bind("<Button-1>", self.move_up)
+
     def add_image_to_grid(self, row, col, image_path):
 
         if row < 0 or row >= self.size or col < 0 or col >= self.size:
@@ -24,7 +26,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
         y0 = row * self.cell_size
         if (row, col) in self.images:
             self.canvas.delete(self.images[(row, col)])
-        self.images[(row, col)] = tk.PhotoImage(file=image_path)
+
         # tot nu toe kunnen we die afbeelding aan de grid toevoegen maar we moeten die nog scalen tot een grid cell
 
         original_image = tk.PhotoImage(file=image_path)
@@ -49,16 +51,46 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 y1 = y0 + self.cell_size
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
+    def update_ui(self, logic_grid):
+        self.canvas.delete("all")
+        # Redraw grid
+        self.draw_grid()
+
+        for i in range(self.size):
+            for j in range(self.size):
+                pos = logic_grid[i][j]
+                if pos.agent:
+                    self.add_image_to_grid(i, j, "Agent.png")
+                elif pos.item:
+                    self.add_image_to_grid(i, j, "download.png") #item.png
+                elif pos.loading_dock:
+                    self.add_image_to_grid(i, j, "Pits.png")
+                else:
+                    if (i, j) in self.images:
+                        self.canvas.delete(self.images[(i, j)])
+                        del self.images[(i, j)]
+
+    def move_up(self, event):
+        row = event.y // self.cell_size
+        col = event.x // self.cell_size
+        print(row,col)
+
+        agent = logic_grid.logic_grid[row][col].agent
+
+        if agent:
+            agent.move((row - 1, col))
+
+
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, cell_size=30, laadplatformen=2, nr_of_agents=2):
         self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
-        self.grid_ui = GridUI(10)
+        self.grid_ui = GridUI(size)
         self.size = size
 
     def find(self, item_name): # functie om te vinden waar een item is in de grid
-        return self.items_to_pos_dict(item_name)
+        return self.items_to_pos_dict[item_name]
 
     def init_agents(self):  # geef de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
@@ -73,10 +105,19 @@ class Grid(object):  # het logische grid
         for key, value in self.items_to_pos_dict.items(): # populate de items
             x, y = value
             self.logic_grid[x][y].item = key
-        for agent in self.agents: # populate de laadplekken en agenten
+            print(f"Added item '{key}' at position ({x}, {y})")
+
+        bottom_row_positions = list(range(self.size))
+        random.shuffle(bottom_row_positions)
+
+        for agent in self.agents:
             x, y = agent.starting_position
             self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
             self.logic_grid[x][y].agent = agent
+            print(f"Added agent at position ({x}, {y}) with loading dock")
+
+
+        self.grid_ui.update_ui(self.logic_grid) # updating method!!!
 
     def update_agents(self, new_agents, old_agents): # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
@@ -97,10 +138,12 @@ class Grid(object):  # het logische grid
         for agent in self.agents:
             other_agents = self.agents.remove(agent)
             agent.other_agents = other_agents
+        self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
 class Agent(object):
     def __init__(self, grid, strategy="random", capacity=2): # TODO: maak het zodat je gemakkelijk strategies kan veranderen
         self.goals = []
+        self.cell_size = 30
         self.strategy = strategy
         self.grid = grid
         self.path = []
@@ -122,6 +165,11 @@ class Agent(object):
             x_new, y_new = position
             self.grid.logic_grid[x_curr][y_curr].agent = None
             self.grid.logic_grid[x_new][y_curr].agent = self
+            self.current_position = position
+            self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+
+
+
 
 
 class Item(object):
@@ -154,13 +202,31 @@ def generate_positions(lijst_van_producten, grid_size):
         dict[product] = (x, y)
     return dict
 
+def initialize_grid(size, product_list):
+    positions = generate_positions(product_list, size)
+    grid = Grid(positions, size)
+    grid.populate_grid()
+    return grid
+
+
+
+
+
+
 
 if __name__ == "__main__":
-    logic_grid = Grid({}, 5)
-    logic_grid.init_agents()
-    logic_grid.populate_grid()
+    #logic_grid = Grid({}, 5)
+    #logic_grid.init_agents()
+    #logic_grid.populate_grid()
+    #logic_grid.grid_ui.mainloop()
+
+    #grid_ui = GridUI(10)
+    #grid_ui.add_image_to_grid(2, 3, "download.png")
+    #grid_ui.mainloop()
+
+    products = ["download.png"]
+    grid_size = 10
+    logic_grid = initialize_grid(grid_size, products)
     logic_grid.grid_ui.mainloop()
 
-    grid_ui = GridUI(10)
-    grid_ui.add_image_to_grid(2, 3, "download.png")
-    grid_ui.mainloop()
+
