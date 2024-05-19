@@ -23,7 +23,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
         x0 = col * self.cell_size
         y0 = row * self.cell_size
         if (row, col) in self.images:
-            self.canvas.delete(self.images[(col, row)])
+            self.canvas.delete(self.images[(row, col)])
         self.images[(row, col)] = tk.PhotoImage(file=image_path)
         # tot nu toe kunnen we die afbeelding aan de grid toevoegen maar we moeten die nog scalen tot een grid cell
 
@@ -52,8 +52,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, laadplatformen=2, nr_of_agents=2):
-        self.agents = [Agent(self) for _ in range(
-            nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size)
@@ -68,7 +67,7 @@ class Grid(object):  # het logische grid
             other_agents_list = self.agents.copy()
             other_agents_list.remove(agent)
             agent.other_agents = other_agents_list
-            agent.starting_position = (current_starting_pos, self.size-1)
+            agent.starting_position = (self.size-1, current_starting_pos)
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
@@ -76,11 +75,12 @@ class Grid(object):  # het logische grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
             row, col = value
             self.logic_grid[row][col].item = key
-            self.grid_ui.add_image_to_grid(row, col, "download.png")
+            self.grid_ui.add_image_to_grid(row, col, "download.png") # TODO: deze moet denk ik weg als er een goede mapping bestaat
         for agent in self.agents:  # populate de laadplekken en agenten
             row, col = agent.starting_position
-            self.logic_grid[row][col].loading_dock = Loading_dock(agent, agent.starting_position)
+            self.logic_grid[row][col].loading_dock = LoadingDock(agent, agent.starting_position)
             self.logic_grid[row][col].agent = agent
+            self.grid_ui.add_image_to_grid(row, col, "epic.png")  # TODO: deze moet denk ik weg als er een goede mapping bestaat
 
     def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
@@ -96,7 +96,7 @@ class Grid(object):  # het logische grid
             if not len(starting_positions) == 0:
                 agent.starting_position = starting_positions.pop()
                 row, col = agent.starting_position
-                self.logic_grid[row][col].loading_dock = Loading_dock(agent, agent.starting_position)
+                self.logic_grid[row][col].loading_dock = LoadingDock(agent, agent.starting_position)
                 agent.current_position = agent.starting_position  # pas hier de positie aan als de agent niet begint op de loading dock
         for agent in self.agents:
             other_agents = self.agents.remove(agent)
@@ -139,7 +139,7 @@ class Item(object):
         self.volume = height * width * depth
 
 
-class Loading_dock(object):
+class LoadingDock(object):
     def __init__(self, agent, position):
         self.agent = agent
         self.position = position
@@ -163,8 +163,7 @@ def generate_positions(lijst_van_producten, grid_size):
     taken_pos: list[(int, int)] = []
     for product in lijst_van_producten:
         while True:
-            new_pos = generate_position(0, grid_size - 2, 0,
-                                        grid_size - 1)  # onderste rij is gereserveerd voor load docks
+            new_pos = generate_position(0, grid_size - 2, 0, grid_size - 1)  # onderste rij is gereserveerd voor load docks
             if new_pos not in taken_pos:
                 taken_pos.append(new_pos)
                 dict[product] = new_pos
