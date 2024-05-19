@@ -54,7 +54,7 @@ class Grid(object):  # het logische grid
         self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
-        self.grid_ui = GridUI(10)
+        self.grid_ui = GridUI(size)
         self.size = size
 
     def find(self, item_name): # functie om te vinden waar een item is in de grid
@@ -73,6 +73,7 @@ class Grid(object):  # het logische grid
         for key, value in self.items_to_pos_dict.items(): # populate de items
             x, y = value
             self.logic_grid[x][y].item = key
+            self.grid_ui.add_image_to_grid(x, y, "download.png")
         for agent in self.agents: # populate de laadplekken en agenten
             x, y = agent.starting_position
             self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
@@ -106,6 +107,7 @@ class Agent(object):
         self.path = []
         self.available = []
         self.other_agents = []
+        self.other_agents_choices = []
         self.starting_position = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position = (-1, -1) # filler positie
 
@@ -115,6 +117,7 @@ class Agent(object):
         self.goals.append(item)
         for agent in self.other_agents:
             agent.available.remove(item)
+            agent.other_agents_choices.append(item)
 
     def move(self, position):
         if adjacent(self.current_position, position) and self.grid.logic_grid.agent is None:
@@ -162,11 +165,18 @@ def generate_order(lijst_van_producten, length_of_order=6):
 
 
 if __name__ == "__main__":
-    logic_grid = Grid({}, 5)
+    grid_size = 5
+    item1 = Item("item1")
+    item2 = Item("item2")
+    item3 = Item("item3")
+    producten_lijst = [item1, item2, item3]
+    item_dict = generate_positions(producten_lijst, grid_size)
+    order = generate_order(producten_lijst)
+    logic_grid = Grid(item_dict, grid_size)
     logic_grid.init_agents()
     logic_grid.populate_grid()
     logic_grid.grid_ui.mainloop()
 
-    grid_ui = GridUI(10)
-    grid_ui.add_image_to_grid(2, 3, "download.png")
-    grid_ui.mainloop()
+    # grid_ui = GridUI(10)
+    # grid_ui.add_image_to_grid(2, 3, "download.png")
+    # grid_ui.mainloop()
