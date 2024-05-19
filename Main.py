@@ -215,9 +215,6 @@ def my_print(item):
             print("current coordinate = ", (y, x))
 
 
-
-
-
 if __name__ == "__main__":
     grid_size = 5
     item1 = Item("item1")
