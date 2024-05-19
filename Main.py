@@ -23,7 +23,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
         x0 = col * self.cell_size
         y0 = row * self.cell_size
         if (row, col) in self.images:
-            self.canvas.delete(self.images[(row, col)])
+            self.canvas.delete(self.images[(col, row)])
         self.images[(row, col)] = tk.PhotoImage(file=image_path)
         # tot nu toe kunnen we die afbeelding aan de grid toevoegen maar we moeten die nog scalen tot een grid cell
 
@@ -49,58 +49,63 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 y1 = y0 + self.cell_size
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
+
 class Grid(object):  # het logische grid
-    def __init__(self, item_to_pos_dict, size, cell_size=30, laadplatformen=2, nr_of_agents=2):
-        self.agents = [Agent(self) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+    def __init__(self, item_to_pos_dict, size, laadplatformen=2, nr_of_agents=2):
+        self.agents = [Agent(self) for _ in range(
+            nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size)
         self.size = size
 
-    def find(self, item_name): # functie om te vinden waar een item is in de grid
+    def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
 
     def init_agents(self):  # geef de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
         for agent in self.agents:
-            other_agents_list = self.agents.remove(agent)
+            other_agents_list = self.agents.copy()
+            other_agents_list.remove(agent)
             agent.other_agents = other_agents_list
-            agent.starting_position = (current_starting_pos, self.size)
+            agent.starting_position = (current_starting_pos, self.size-1)
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
-    def populate_grid(self): # vul de grid met alle agenten, items en loading docks
-        for key, value in self.items_to_pos_dict.items(): # populate de items
-            x, y = value
-            self.logic_grid[x][y].item = key
-            self.grid_ui.add_image_to_grid(x, y, "download.png")
-        for agent in self.agents: # populate de laadplekken en agenten
-            x, y = agent.starting_position
-            self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
-            self.logic_grid[x][y].agent = agent
+    def populate_grid(self):  # vul de grid met alle agenten, items en loading docks
+        for key, value in self.items_to_pos_dict.items():  # populate de items
+            row, col = value
+            self.logic_grid[row][col].item = key
+            self.grid_ui.add_image_to_grid(row, col, "download.png")
+        for agent in self.agents:  # populate de laadplekken en agenten
+            row, col = agent.starting_position
+            self.logic_grid[row][col].loading_dock = Loading_dock(agent, agent.starting_position)
+            self.logic_grid[row][col].agent = agent
 
-    def update_agents(self, new_agents, old_agents): # functie die kapotte agents verwijdert en toevoegt
+    def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
         for agent in old_agents:
             self.agents.remove(agent)
-            x_curr, y_curr = agent.current_position
-            x_starting, y_starting = agent.starting_position
+            curr_row, curr_col = agent.current_position
+            starting_row, starting_col = agent.starting_position
             starting_positions.append(agent.starting_position)
-            self.logic_grid[x_curr][y_curr].agent = None
-            self.logic_grid[x_starting][y_starting].loading_dock = None
+            self.logic_grid[curr_row][curr_col].agent = None
+            self.logic_grid[starting_row][starting_col].loading_dock = None
         for agent in new_agents:
             self.agents.append(agent)
             if not len(starting_positions) == 0:
                 agent.starting_position = starting_positions.pop()
-                x, y = agent.starting_position
-                self.logic_grid[x][y].loading_dock = Loading_dock(agent, agent.starting_position)
-                agent.current_position = agent.starting_position # pas hier de positie aan als de agent niet begint op de loading dock
+                row, col = agent.starting_position
+                self.logic_grid[row][col].loading_dock = Loading_dock(agent, agent.starting_position)
+                agent.current_position = agent.starting_position  # pas hier de positie aan als de agent niet begint op de loading dock
         for agent in self.agents:
             other_agents = self.agents.remove(agent)
             agent.other_agents = other_agents
 
+
 class Agent(object):
-    def __init__(self, grid, strategy="random", capacity=2): # TODO: maak het zodat je gemakkelijk strategies kan veranderen
+    def __init__(self, grid, strategy="random",
+                 capacity=2):  # TODO: maak het zodat je gemakkelijk strategies kan veranderen
         self.goals = []
         self.strategy = strategy
         self.grid = grid
@@ -109,10 +114,10 @@ class Agent(object):
         self.other_agents = []
         self.other_agents_choices = []
         self.starting_position = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
-        self.current_position = (-1, -1) # filler positie
+        self.current_position = (-1, -1)  # filler positie
 
     def choose_item(self):
-        item = random.choice(self.available) # verander hier de keuze methode
+        item = random.choice(self.available)  # verander hier de keuze methode
         self.available.remove(item)
         self.goals.append(item)
         for agent in self.other_agents:
@@ -121,10 +126,10 @@ class Agent(object):
 
     def move(self, position):
         if adjacent(self.current_position, position) and self.grid.logic_grid.agent is None:
-            x_curr, y_curr = self.current_position
-            x_new, y_new = position
-            self.grid.logic_grid[x_curr][y_curr].agent = None
-            self.grid.logic_grid[x_new][y_curr].agent = self
+            curr_row, curr_col = self.current_position
+            new_row, new_col = position
+            self.grid.logic_grid[curr_row][curr_col].agent = None
+            self.grid.logic_grid[new_row][new_col].agent = self
 
 
 class Item(object):
@@ -133,10 +138,12 @@ class Item(object):
         self.weight = weight
         self.volume = height * width * depth
 
+
 class Loading_dock(object):
     def __init__(self, agent, position):
         self.agent = agent
         self.position = position
+
 
 class Position(object):
     def __init__(self):
@@ -144,24 +151,45 @@ class Position(object):
         self.loading_dock = None
         self.item = None
 
+
 def adjacent(pos1, pos2):
-    x1, y1 = pos1
-    x2, y2 = pos2
-    return abs(x1 - x2) == 1 ^ abs(y1 - y2) == 1
+    row1, col1 = pos1
+    row2, col2 = pos2
+    return abs(row1 - row2) == 1 ^ abs(col1 - col2) == 1
+
 
 def generate_positions(lijst_van_producten, grid_size):
     dict = {}
+    taken_pos: list[(int, int)] = []
     for product in lijst_van_producten:
-        x = random.randint(0, grid_size-1)
-        y = random.randint(0, grid_size-2)  # onderste rij is gereserveerd voor load docks
-        dict[product] = (x, y)
+        while True:
+            new_pos = generate_position(0, grid_size - 2, 0,
+                                        grid_size - 1)  # onderste rij is gereserveerd voor load docks
+            if new_pos not in taken_pos:
+                taken_pos.append(new_pos)
+                dict[product] = new_pos
+                break
     return dict
+
+
+def generate_position(min_row, max_row, min_col, max_col):
+    row = random.randint(min_row, max_row)
+    col = random.randint(min_col, max_col)
+    return (row, col)
+
 
 def generate_order(lijst_van_producten, length_of_order=6):
     order = []
     for _ in range(length_of_order):
         order.append(random.choice(lijst_van_producten))
     return order
+
+
+def my_print(item):
+    row, col = item.shape
+    for y in range(row):
+        for x in range(col):
+            print("current coordinate = ", (y, x))
 
 
 if __name__ == "__main__":
@@ -176,7 +204,4 @@ if __name__ == "__main__":
     logic_grid.init_agents()
     logic_grid.populate_grid()
     logic_grid.grid_ui.mainloop()
-
-    # grid_ui = GridUI(10)
-    # grid_ui.add_image_to_grid(2, 3, "download.png")
-    # grid_ui.mainloop()
+    # my_print(logic_grid.logic_grid)
