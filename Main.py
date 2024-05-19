@@ -57,6 +57,8 @@ class Grid(object):  # het logische grid
         self.logic_grid = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size)
         self.size = size
+        self.init_on_curr_pos = True    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
+                                        # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
 
     def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
@@ -84,28 +86,46 @@ class Grid(object):  # het logische grid
 
     def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
+        current_positions = []
         for agent in old_agents:
             self.agents.remove(agent)
             curr_row, curr_col = agent.current_position
             starting_row, starting_col = agent.starting_position
-            starting_positions.append(agent.starting_position)
+            starting_positions.append((starting_row, starting_col))
+            current_positions.append((curr_row, curr_col))
             self.logic_grid[curr_row][curr_col].agent = None
             self.logic_grid[starting_row][starting_col].loading_dock = None
-        for agent in new_agents:
-            self.agents.append(agent)
-            if not len(starting_positions) == 0:
-                agent.starting_position = starting_positions.pop()
-                row, col = agent.starting_position
-                self.logic_grid[row][col].loading_dock = LoadingDock(agent, agent.starting_position)
-                agent.current_position = agent.starting_position  # pas hier de positie aan als de agent niet begint op de loading dock
+        if self.init_on_curr_pos: # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
+            positions = zip(starting_positions, current_positions)
+            for agent in new_agents:
+                self.agents.append(agent)
+                if not len(positions) == 0: # safety check
+                    starting_pos, current_pos = positions.pop()
+                    agent.starting_position = starting_pos
+                    agent.current_position = current_pos
+                    starting_row, starting_col = starting_pos
+                    curr_row, curr_col = current_pos
+                    self.logic_grid[starting_row][starting_col].loading_dock = LoadingDock(agent, agent.starting_position)
+                    self.logic_grid[curr_row][curr_col].agent = agent
+        else:
+            positions = starting_positions
+            for agent in new_agents:
+                self.agents.append(agent)
+                if not len(positions) == 0:  # safety check
+                    starting_pos = positions.pop()
+                    agent.starting_position = starting_pos
+                    agent.current_position = agent.starting_position
+                    starting_row, starting_col = starting_pos
+                    self.logic_grid[starting_row][starting_col].loading_dock = LoadingDock(agent, agent.starting_position)
+                    self.logic_grid[starting_row][starting_col].agent = agent
         for agent in self.agents:
-            other_agents = self.agents.remove(agent)
+            other_agents = self.agents.copy()
+            other_agents.remove(agent)
             agent.other_agents = other_agents
 
 
 class Agent(object):
-    def __init__(self, grid, strategy="random",
-                 capacity=2):  # TODO: maak het zodat je gemakkelijk strategies kan veranderen
+    def __init__(self, grid, strategy="random", capacity=2):  # TODO: maak het zodat je gemakkelijk strategies kan veranderen
         self.goals = []
         self.strategy = strategy
         self.grid = grid
