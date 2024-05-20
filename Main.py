@@ -123,7 +123,7 @@ class Grid(object):  # het logische grid
 
         #self.grid_ui.add_image_to_grid(row, col, "epic.png")  # TODO: deze moet denk ik weg als er een goede mapping bestaat
 
-        self.grid_ui.update_ui(self.logic_grid) # updating method!!!
+        self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
     def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
