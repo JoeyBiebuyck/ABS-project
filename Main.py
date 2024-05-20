@@ -19,6 +19,8 @@ class GridUI(tk.Tk):  # voor de visualisatie
         self.draw_grid()
         self.images = {}  # als dictionary initialiseren
 
+        #self.canvas.bind("<Button-1>", self.move_up)
+
     def add_image_to_grid(self, row, col, image_path):
 
         if row < 0 or row >= self.size or col < 0 or col >= self.size:
@@ -54,6 +56,36 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
 
+    def update_ui(self, logic_grid):
+        self.canvas.delete("all")
+        # Redraw grid
+        self.draw_grid()
+
+        for i in range(self.size):
+            for j in range(self.size):
+                pos = logic_grid[i][j]
+                if pos.agent:
+                    self.add_image_to_grid(i, j, "Agent.png")
+                elif pos.item:
+                    self.add_image_to_grid(i, j, "download.png") #item.png
+                elif pos.loading_dock:
+                    self.add_image_to_grid(i, j, "Pits.png")
+                else:
+                    if (i, j) in self.images:
+                        self.canvas.delete(self.images[(i, j)])
+                        del self.images[(i, j)]
+
+    def move_up(self, event):
+        row = event.y // self.cell_size
+        col = event.x // self.cell_size
+        print(row,col)
+
+        agent = logic_grid.logic_grid[row][col].agent
+
+        if agent:
+            agent.move((row - 1, col))
+
+
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, strategy=random_action, laadplatformen=2, nr_of_agents=2):
         self.agents = [Agent(self, strategy) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
@@ -81,12 +113,17 @@ class Grid(object):  # het logische grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
             row, col = value
             self.logic_grid[row][col].item = key
-            self.grid_ui.add_image_to_grid(row, col, "download.png") # TODO: deze moet denk ik weg als er een goede mapping bestaat
+            print(f"Added item '{key}' at position ({row}, {col})")
+            #self.grid_ui.add_image_to_grid(row, col, "download.png") # TODO: deze moet denk ik weg als er een goede mapping bestaat
         for agent in self.agents:  # populate de laadplekken en agenten
             row, col = agent.starting_position
             self.logic_grid[row][col].loading_dock = LoadingDock(agent, agent.starting_position)
-            self.logic_grid[row][col].agent = agent
-            self.grid_ui.add_image_to_grid(row, col, "epic.png")  # TODO: deze moet denk ik weg als er een goede mapping bestaat
+            #self.logic_grid[row][col].agent = agent
+            print(f"Added agent at position ({row}, {col}) with loading dock")
+
+        #self.grid_ui.add_image_to_grid(row, col, "epic.png")  # TODO: deze moet denk ik weg als er een goede mapping bestaat
+
+        self.grid_ui.update_ui(self.logic_grid) # updating method!!!
 
     def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
         starting_positions = []
@@ -126,6 +163,7 @@ class Grid(object):  # het logische grid
             other_agents = self.agents.copy()
             other_agents.remove(agent)
             agent.other_agents = other_agents
+        self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
 
 class Agent(object):
@@ -154,6 +192,8 @@ class Agent(object):
             curr_row, curr_col = self.current_position
             self.grid.logic_grid[curr_row][curr_col].agent = None
             self.grid.logic_grid[new_row][new_col].agent = self
+            self.current_position = position
+            self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
 
 
 class Item(object):
@@ -194,6 +234,17 @@ def generate_positions(lijst_van_producten, grid_size):
                 break
     return dict
 
+def initialize_grid(size, product_list):
+    positions = generate_positions(product_list, size)
+    grid = Grid(positions, size)
+    grid.populate_grid()
+    return grid
+
+
+
+
+
+
 
 def generate_position(min_row, max_row, min_col, max_col):
     row = random.randint(min_row, max_row)
@@ -226,5 +277,21 @@ if __name__ == "__main__":
     logic_grid = Grid(item_dict, grid_size)
     logic_grid.init_agents()
     logic_grid.populate_grid()
+    #logic_grid = Grid({}, 5)
+    #logic_grid.init_agents()
+    #logic_grid.populate_grid()
+    #logic_grid.grid_ui.mainloop()
+
+    #grid_ui = GridUI(10)
+    #grid_ui.add_image_to_grid(2, 3, "download.png")
+    #grid_ui.mainloop()
+
+    products = ["download.png"]
+    grid_size = 10
+    logic_grid = initialize_grid(grid_size, products)
     logic_grid.grid_ui.mainloop()
+
+    grid_ui = GridUI(10)
+    grid_ui.add_image_to_grid(2, 3, "download.png")
+    grid_ui.mainloop()
     # my_print(logic_grid.logic_grid)
