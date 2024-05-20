@@ -241,11 +241,6 @@ def initialize_grid(size, product_list):
     return grid
 
 
-
-
-
-
-
 def generate_position(min_row, max_row, min_col, max_col):
     row = random.randint(min_row, max_row)
     col = random.randint(min_col, max_col)
@@ -280,18 +275,18 @@ if __name__ == "__main__":
     #logic_grid = Grid({}, 5)
     #logic_grid.init_agents()
     #logic_grid.populate_grid()
-    #logic_grid.grid_ui.mainloop()
+    logic_grid.grid_ui.mainloop()
 
     #grid_ui = GridUI(10)
     #grid_ui.add_image_to_grid(2, 3, "download.png")
     #grid_ui.mainloop()
 
-    products = ["download.png"]
-    grid_size = 10
-    logic_grid = initialize_grid(grid_size, products)
-    logic_grid.grid_ui.mainloop()
-
-    grid_ui = GridUI(10)
-    grid_ui.add_image_to_grid(2, 3, "download.png")
-    grid_ui.mainloop()
+    # products = ["download.png"]
+    # grid_size = 10
+    # logic_grid = initialize_grid(grid_size, products)
+    # logic_grid.grid_ui.mainloop()
+    #
+    # grid_ui = GridUI(10)
+    # grid_ui.add_image_to_grid(2, 3, "download.png")
+    # grid_ui.mainloop()
     # my_print(logic_grid.logic_grid)
