@@ -108,17 +108,17 @@ class Grid(object):  # het logische grid
     #         agent.move((row - 1, col))
     #         self.grid_ui.update_ui(self.logic_grid)
 
-    def hasItem(self, position, listOfItems):
+    def hasItem(self, position, listOfItems): # kijkt of er op een positie een item die in list of items zit
         row, col = position
         item = self.logic_grid[row][col].item
         return item in listOfItems
 
-    def isLoadingDock(self, position, agent):
+    def isLoadingDock(self, position, agent): # loading dok is specifiek aan een agent is
         row, col = position
         loading_dock = self.logic_grid[row][col].loading_dock
         return loading_dock.agent == agent
 
-    def init_agents(self):  # geef de agenten hun startpositie en een lijst van andere agenten
+    def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
         for agent in self.agents:
             other_agents_list = self.agents.copy()
@@ -128,7 +128,7 @@ class Grid(object):  # het logische grid
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
-    def populate_grid(self):  # vul de grid met alle agenten, items en loading docks
+    def populate_grid(self):  # vul de grid met alle agenten, items en loading docks in logic grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
             row, col = value
             self.logic_grid[row][col].item = key
@@ -141,7 +141,7 @@ class Grid(object):  # het logische grid
 
         self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
-    def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt
+    def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
         starting_positions = []
         current_positions = []
         for agent in old_agents:
@@ -181,12 +181,12 @@ class Grid(object):  # het logische grid
             agent.other_agents = other_agents
         self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
-    def broadcastOrder(self, order):
+    def broadcastOrder(self, order): # laat aan elke agent weten wat de order is
         for agent in self.agents:
             agent.available.append(order)
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
-    def play(self):
+    def play(self): # roept play op bij elke agent
         while True:
             for agent in self.agents:
                 agent.play()
@@ -197,15 +197,15 @@ class Agent(object):
     def __init__(self, grid, strategy, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
-        self.other_agents: list[Agent] = []
-        self.capacity = capacity
-        self.storage = []
-        self.strategy = strategy
-        self.grid: Grid = grid
-        self.path = []
-        self.available: list[Item] = []
-        self.chosen_items: list[Item] = []
-        self.other_agents_choices: list[Item] = []
+        self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
+        self.capacity = capacity #storage van een agent
+        self.storage = [] # wat zit er al in de storage
+        self.strategy = strategy #welke strategie
+        self.grid: Grid = grid # logic grid
+        self.path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
+        self.available: list[Item] = [] # items van de order die nog niet gereserveerd zijn
+        self.chosen_items: list[Item] = []# items die agent zelf koos
+        self.other_agents_choices: list[Item] = [] #items die andere agents kozen
         self.highestOrder = 0
         self.currentOrder = 0
         self.originalOrders = {} # dict van order number -> originele order
@@ -216,7 +216,7 @@ class Agent(object):
     #TODO: beurt of geen beurt om een item te pakken? -> momenteel wel beurt!
     #TODO: Beschouw pad als heen en terug ? -> momenteel wel!
     #TODO: elke beurt pad berekenen? -> momenteel niet
-    def play(self):
+    def play(self): #kies actie
         if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
         elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
@@ -226,7 +226,7 @@ class Agent(object):
         elif self.grid.isLoadingDock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
             self.deposit()
         else:
-            self.move(self.path[0])
+            self.move(self.path[0]) #eerste coordinaat in path
 
     def make_path(self):
         pass
@@ -260,7 +260,7 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def move(self, position):
+    def move(self, position): #checkt of je ergens effectief naar toe kan en beweegt en verwijderd uit pad
         new_row, new_col = position
         if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
             self.path.remove(position)
@@ -309,7 +309,7 @@ def outOfBounds(pos, size):
     return row < 0 or row > size-1 or col < 0 or col > size-1
 
 
-def generate_positions(lijst_van_producten, grid_size):
+def generate_positions(lijst_van_producten, grid_size): # bouwt item to position dictionary
     dict = {}
     taken_pos: list[(int, int)] = []
     for product in lijst_van_producten:
@@ -328,7 +328,7 @@ def initialize_grid(size, product_list):
     return grid
 
 
-def generate_position(min_row, max_row, min_col, max_col):
+def generate_position(min_row, max_row, min_col, max_col): # bouwt item to position dictionary
     row = random.randint(min_row, max_row)
     col = random.randint(min_col, max_col)
     return (row, col)
