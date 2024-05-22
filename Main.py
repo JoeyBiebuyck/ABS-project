@@ -64,11 +64,11 @@ class GridUI(tk.Tk):  # voor de visualisatie
             for j in range(self.size):
                 pos = logic_grid[i][j]
                 if pos.agent:
-                    self.add_image_to_grid(i, j, "Agent.png")
+                    self.add_image_to_grid(i, j, "agent.png")
                 elif pos.item:
-                    self.add_image_to_grid(i, j, "download.png") #item.png
+                    self.add_image_to_grid(i, j, random.choice(["apple.png", "peach.png", "banana.png"])) #item.png
                 elif pos.loading_dock:
-                    self.add_image_to_grid(i, j, "Pits.png")
+                    self.add_image_to_grid(i, j, "loading_dock.png")
                 else:
                     if (i, j) in self.images:
                         self.canvas.delete(self.images[(i, j)])
