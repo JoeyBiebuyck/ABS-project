@@ -83,7 +83,7 @@ class Grid(object):  # het logische grid
         self.grid_ui = GridUI(size, cell_size)
         self.size = size
         self.cell_size = cell_size
-        self.init_on_curr_pos = True    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
+        self.init_on_curr_pos = False    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
                                         # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
 
         #self.grid_ui.canvas.bind("<Button-1>", self.move_up)
@@ -141,18 +141,22 @@ class Grid(object):  # het logische grid
 
         self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
-    def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
+    def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
         starting_positions = []
         current_positions = []
+        old_choices = []
+
         for agent in old_agents:
-            self.agents.remove(agent)
+            self.agents.remove(agent) # haal de agent weg uit de lijst agenten
             curr_row, curr_col = agent.current_position
             starting_row, starting_col = agent.starting_position
-            starting_positions.append((starting_row, starting_col))
-            current_positions.append((curr_row, curr_col))
+            starting_positions.append((starting_row, starting_col)) # sla zijn startpositie op
+            current_positions.append((curr_row, curr_col))  # sla zijn huidige positie op
+            old_choices.append(agent.chosen_items) # alle items dat hij op zich had gaan verloren, onthou welke hij gereserveerd had
             self.logic_grid[curr_row][curr_col].agent = None
             self.logic_grid[starting_row][starting_col].loading_dock = None
-        if self.init_on_curr_pos: # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
+
+        if self.init_on_curr_pos:  # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
             positions = zip(starting_positions, current_positions)
             for agent in new_agents:
                 self.agents.append(agent)
@@ -175,10 +179,12 @@ class Grid(object):  # het logische grid
                     starting_row, starting_col = starting_pos
                     self.logic_grid[starting_row][starting_col].loading_dock = LoadingDock(agent, agent.starting_position)
                     self.logic_grid[starting_row][starting_col].agent = agent
+
         for agent in self.agents:
             other_agents = self.agents.copy()
             other_agents.remove(agent)
             agent.other_agents = other_agents
+            agent.available += old_choices # voeg de gedepositte items toe aan de available items
         self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
     def broadcastOrder(self, order): # laat aan elke agent weten wat de order is
@@ -208,8 +214,8 @@ class Agent(object):
         self.other_agents_choices: list[Item] = [] #items die andere agents kozen
         self.highestOrder = 0
         self.currentOrder = 0
-        self.originalOrders = {} # dict van order number -> originele order
-        self.developingOrders = {} # dict van order number -> items van de order dat nog niet gedeposit zijn
+        self.originalOrders = {}  # dict van order number -> originele order
+        self.developingOrders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
 
 
     #TODO: pad maken om heen te gaan naar een item en dan nieuw pad om terug te gaan naar laadplatform?
