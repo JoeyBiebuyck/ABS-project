@@ -200,20 +200,27 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
-def strategy_1( available, chosen_items, other_agent_choices, current_position, positions):
-    if len(other_agent_choices):
-        pass
-    else manhatten_distance(current_position)
+def manhatten_distance(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    return abs(x1 - x2) + abs(y1 - y2)
 
-def social_distance_heuristiek(order_list, product_locations, intention):
-    orderlocations = []
-    distances = []
-    for i in order_list:
-        orderlocations.append(product_locations[i])
+def strategy_1( available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
+    location_available_items = []
+    distance_to_available_items = []
+    for i in available:
+        location_available_items.append(product_locations_dictonairy[i])
 
-    for i in orderlocations:
-        distances.append(manhattenDistance(i, intention))
-    return order_list.ref(distances.index(max(distances)))
+    if len(other_agent_choices) == 0:
+        for i in location_available_items:
+            distance_to_available_items.append(manhatten_distance(i, current_position))
+        return available.ref(distance_to_available_items.index(min(distance_to_available_items)))
+    else:
+        for i in location_available_items:
+            distance_to_available_items.append(manhatten_distance(i, other_agent_choices[-1]))
+        return available.ref(distance_to_available_items.index(max(distance_to_available_items)))
+
+
 
 
 class Agent(object):
@@ -276,7 +283,7 @@ class Agent(object):
 
 
     def choose_item(self):
-        item = self.strategy(self.available, self.chosen_items, self.other_agents_choices)  # verander hier de keuze methode
+        item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available.remove(item)
         self.chosen_items.append(item)
         for agent in self.other_agents:
