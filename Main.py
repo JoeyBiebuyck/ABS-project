@@ -200,6 +200,10 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
+def strategy_1( available, chosen_items, other_agent_choices, current_position, positions):
+    if len(other_agent_choices):
+        pass
+    else manhatten_distance(current_position)
 
 
 class Agent(object):
@@ -209,7 +213,7 @@ class Agent(object):
         self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
         self.capacity = capacity #storage van een agent
         self.storage = [] # wat zit er al in de storage
-        self.strategy = strategy #welke strategie
+        self.strategy = strategy_1 #welke strategie
         self.grid: Grid = grid # logic grid
         self.path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
         self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
@@ -237,7 +241,7 @@ class Agent(object):
         else:
             self.move(self.path[0]) #eerste coordinaat in path
 
-    def make_path(self):
+    def make_path(self): #maakt pad van de chosen items
         pass
 
 
@@ -262,7 +266,7 @@ class Agent(object):
 
 
     def choose_item(self):
-        item = self.strategy(self.available)  # verander hier de keuze methode
+        item = self.strategy(self.available, self.chosen_items, self.other_agents_choices)  # verander hier de keuze methode
         self.available.remove(item)
         self.chosen_items.append(item)
         for agent in self.other_agents:
