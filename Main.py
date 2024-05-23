@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import tkinter as tk
 import random
 import math
+import queue
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -201,6 +202,10 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
+def heuristic(a, b):
+    return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
+def neighbours(location):
+    return ((location[0]-1, location[1]), (location[0]+1, location[1]), (location[0], location[1]+1), (location[0], location[1]-1))
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
@@ -264,7 +269,27 @@ class Agent(object):
         for item in self.chosen_items:
             location = self.grid.find(item)
             locations.append(location)
+        goal = locations[0]
+        current_location = self.current_position
+        Agenda = queue.PriorityQueue()
+        visited_states = []
+        Agenda.push((current_location, [], 0), 0)
 
+        while True:
+            if (not Agenda.empty()):
+                current_state, action_path, total_cost = Agenda.pop()
+                if current_state not in visited_states:
+                    visited_states.append(current_state)
+                    if goal == current_state:
+                        return action_path
+                    for successor in neighbours(current_state):
+                        newActions = action_path + [action]
+                        heuristic_Value = heuristic(successor, problem)
+                        cost_No_Heuristic = total_cost + stepcost
+                        new_Heuristic_Cost = cost_No_Heuristic + heuristic_Value
+                        Agenda.push((successor, newActions, cost_No_Heuristic), new_Heuristic_Cost)
+                else:
+                    continue
 
 
 
