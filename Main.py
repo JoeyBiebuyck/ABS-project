@@ -218,13 +218,11 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
         for pos in location_available_items:
             print("position: ", pos)
             distance_to_available_items.append(manhattan_distance(pos, current_position))
-        return available.ref(distance_to_available_items.index(min(distance_to_available_items)))
+        return available[(distance_to_available_items.index(min(distance_to_available_items)))]
     else:
         for i in location_available_items:
             distance_to_available_items.append(manhattan_distance(i, other_agent_choices[-1]))
-        return available.ref(distance_to_available_items.index(max(distance_to_available_items)))
-
-
+        return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 
 class Agent(object):
