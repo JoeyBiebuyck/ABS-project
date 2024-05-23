@@ -209,7 +209,7 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
     location_available_items = []
     distance_to_available_items = []
     for i in available:
-        location_available_items.append(product_locations_dictonairy[i])
+        location_available_items.append(product_locations_dictonairy.get(available[i]))
 
     if len(other_agent_choices) == 0:
         for i in location_available_items:
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     main_grid.init_agents()
     main_grid.populate_grid()
     main_grid.broadcast_order(order)
-    # main_grid.play()
+    main_grid.play()
 
 
 
