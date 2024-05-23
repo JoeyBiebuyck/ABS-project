@@ -192,7 +192,7 @@ class Grid(object):  # het logische grid
 
     def broadcast_order(self, order): # laat aan elke agent weten wat de order is
         for agent in self.agents:
-            agent.available.append(order)
+            agent.available += order
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self): # roept play op bij elke agent
@@ -208,7 +208,6 @@ def manhattan_distance(pos1, pos2):
 def strategy_1( available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []
-    available = available[0]
     for item in available:
         print("item: ", item)
         location = product_locations_dictonairy.get(item)
@@ -221,7 +220,9 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
         return available[(distance_to_available_items.index(min(distance_to_available_items)))]
     else:
         for i in location_available_items:
-            distance_to_available_items.append(manhattan_distance(i, other_agent_choices[-1]))
+            print("this is the location of an available item: ", i)
+            print("this is the other agent choice: ", other_agent_choices[-1])
+            distance_to_available_items.append(manhattan_distance(i, product_locations_dictonairy.get(other_agent_choices[-1])))
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 
@@ -285,6 +286,7 @@ class Agent(object):
 
 
     def choose_item(self):
+        print("available: ", self.available)
         item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available.remove(item)
         self.chosen_items.append(item)
