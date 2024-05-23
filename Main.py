@@ -209,9 +209,10 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
     location_available_items = []
     distance_to_available_items = []
     for i in available:
-        location_available_items.append(product_locations_dictonairy.get(available[i]))
+        location = product_locations_dictonairy.get(i)
+        location_available_items.append(location)
 
-    if len(other_agent_choices) == 0:
+    if len(other_agent_choices) == 0: #als er nog geen intentions zijn kiezen we het dichtste item
         for i in location_available_items:
             distance_to_available_items.append(manhatten_distance(i, current_position))
         return available.ref(distance_to_available_items.index(min(distance_to_available_items)))
