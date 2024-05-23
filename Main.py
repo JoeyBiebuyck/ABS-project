@@ -205,6 +205,16 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
         pass
     else manhatten_distance(current_position)
 
+def social_distance_heuristiek(order_list, product_locations, intention):
+    orderlocations = []
+    distances = []
+    for i in order_list:
+        orderlocations.append(product_locations[i])
+
+    for i in orderlocations:
+        distances.append(manhattenDistance(i, intention))
+    return order_list.ref(distances.index(max(distances)))
+
 
 class Agent(object):
     def __init__(self, grid, strategy, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
