@@ -65,7 +65,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
             for j in range(self.size):
                 pos = logic_grid[i][j]
                 if pos.agent:
-                    self.add_image_to_grid(i, j, "agent.png")
+                    self.add_image_to_grid(i, j, "Agent.png")
                 elif pos.item:
                     image = random.choice(images)
                     images.remove(image)
@@ -200,7 +200,7 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
-def manhatten_distance(pos1, pos2):
+def manhattan_distance(pos1, pos2):
     x1, y1 = pos1
     x2, y2 = pos2
     return abs(x1 - x2) + abs(y1 - y2)
@@ -208,17 +208,20 @@ def manhatten_distance(pos1, pos2):
 def strategy_1( available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []
-    for i in available:
-        location = product_locations_dictonairy.get(i)
+    available = available[0]
+    for item in available:
+        print("item: ", item)
+        location = product_locations_dictonairy.get(item)
         location_available_items.append(location)
 
     if len(other_agent_choices) == 0: #als er nog geen intentions zijn kiezen we het dichtste item
-        for i in location_available_items:
-            distance_to_available_items.append(manhatten_distance(i, current_position))
+        for pos in location_available_items:
+            print("position: ", pos)
+            distance_to_available_items.append(manhattan_distance(pos, current_position))
         return available.ref(distance_to_available_items.index(min(distance_to_available_items)))
     else:
         for i in location_available_items:
-            distance_to_available_items.append(manhatten_distance(i, other_agent_choices[-1]))
+            distance_to_available_items.append(manhattan_distance(i, other_agent_choices[-1]))
         return available.ref(distance_to_available_items.index(max(distance_to_available_items)))
 
 
