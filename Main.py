@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
 import random
+import math
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -200,12 +201,8 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
-def manhattan_distance(pos1, pos2):
-    x1, y1 = pos1
-    x2, y2 = pos2
-    return abs(x1 - x2) + abs(y1 - y2)
 
-def strategy_1( available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
+def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []
     for item in available:
@@ -216,13 +213,14 @@ def strategy_1( available, chosen_items, other_agent_choices, current_position, 
     if len(other_agent_choices) == 0: #als er nog geen intentions zijn kiezen we het dichtste item
         for pos in location_available_items:
             print("position: ", pos)
-            distance_to_available_items.append(manhattan_distance(pos, current_position))
+            distance_to_available_items.append(math.dist(pos, current_position))
+            print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
         return available[(distance_to_available_items.index(min(distance_to_available_items)))]
     else:
         for i in location_available_items:
             print("this is the location of an available item: ", i)
             print("this is the other agent choice: ", other_agent_choices[-1])
-            distance_to_available_items.append(manhattan_distance(i, product_locations_dictonairy.get(other_agent_choices[-1])))
+            distance_to_available_items.append(math.dist(i, product_locations_dictonairy.get(other_agent_choices[-1])))
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 
@@ -262,7 +260,12 @@ class Agent(object):
             self.move(self.path[0]) #eerste coordinaat in path
 
     def make_path(self): #maakt pad van de chosen items
-        pass
+        locations = []
+        for item in self.chosen_items:
+            location = self.grid.find(item)
+            locations.append(location)
+
+
 
 
     def pick_up(self):
