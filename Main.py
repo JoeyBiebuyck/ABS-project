@@ -460,7 +460,7 @@ if __name__ == "__main__":
     main_grid.init_agents()
     main_grid.populate_grid()
     main_grid.broadcast_order(order)
-    # main_grid.play()
+    main_grid.play()
 
 
 
