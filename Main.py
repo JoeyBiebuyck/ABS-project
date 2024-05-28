@@ -210,20 +210,20 @@ def strategy_1(available, chosen_items, other_agent_choices, current_position, p
     location_available_items = []
     distance_to_available_items = []
     for item in available:
-        print("item: ", item)
+        #print("item: ", item)
         location = product_locations_dictonairy.get(item)
         location_available_items.append(location)
 
     if len(other_agent_choices) == 0: #als er nog geen intentions zijn kiezen we het dichtste item
         for pos in location_available_items:
-            print("position: ", pos)
+            #print("position: ", pos)
             distance_to_available_items.append(math.dist(pos, current_position))
-            print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
+            #print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
         return available[(distance_to_available_items.index(min(distance_to_available_items)))]
     else:
         for i in location_available_items:
-            print("this is the location of an available item: ", i)
-            print("this is the other agent choice: ", other_agent_choices[-1])
+            #print("this is the location of an available item: ", i)
+            #print("this is the other agent choice: ", other_agent_choices[-1])
             distance_to_available_items.append(math.dist(i, product_locations_dictonairy.get(other_agent_choices[-1])))
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
@@ -260,7 +260,7 @@ class Agent(object):
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
             self.deposit()
         else:
-            self.move(self.path[0]) #eerste coordinaat in path
+            self.select_next_move(self) #we bepalen naar waar de agent moet bewegen.
 
     def make_path(self):
         pass
@@ -293,7 +293,7 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def find_next_position(self): #maakt pad van de chosen items
+    def find_next_position(self): #voorbeeld om selct next move toe te passen
         locations = []
         for item in self.chosen_items:
             location = self.grid.find(item)
@@ -320,20 +320,32 @@ class Agent(object):
                 else:
                     continue
 
-    def move(self, position):
-        #bepaald welk object moet gekozen worden
+    def select_next_move(self):
         #construeert pad en geeft de beste next position weer
         #checkt of je ergens effectief naar toe kan en beweegt en past zich aan
         #returns de beste next position
-        new_row, new_col = position
-        if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
-            self.path.remove(position)
-            if not out_of_bounds(position, self.grid.size):
-                curr_row, curr_col = self.current_position
-                self.grid.logic_grid[curr_row][curr_col].agent = None
-                self.grid.logic_grid[new_row][new_col].agent = self
-                self.current_position = position
-                self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+        #new_row, new_col = position
+        pos_chosen_items = []
+        distance_to_available_items = []
+        for item in self.chosen_items: #gebruiken twee for loops om het dichtste object te kiezen.
+            # print("item: ", item)
+            position_object = self.grid.items_to_pos_dict.get(item)
+            pos_chosen_items.append(position_object)
+        for pos in pos_chosen_items:
+            # print("position: ", pos)
+            distance_to_available_items.append(math.dist(pos, self.current_position))
+            # print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
+        return self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+
+
+        # if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
+        #     self.path.remove(position)
+        #     if not out_of_bounds(position, self.grid.size):
+        #         curr_row, curr_col = self.current_position
+        #         self.grid.logic_grid[curr_row][curr_col].agent = None
+        #         self.grid.logic_grid[new_row][new_col].agent = self
+        #         self.current_position = position
+        #         self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
 
 
     def next_order(self):
