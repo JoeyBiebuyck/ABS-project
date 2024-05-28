@@ -4,8 +4,6 @@ from matplotlib import pyplot as plt
 import tkinter as tk
 import random
 import math
-import heapq
-#import queue
 
 class PriorityQueue:
     def __init__(self):
@@ -219,6 +217,7 @@ class Grid(object):  # het logische grid
     def broadcast_order(self, order): # laat aan elke agent weten wat de order is
         for agent in self.agents:
             agent.available += order
+            agent.the_test_order += order
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self): # roept play op bij elke agent
@@ -233,7 +232,6 @@ def neighbours(loc): #nodig voor a star
     return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal
-    print("goal is: ", goal)
     agenda = PriorityQueue()
     agenda.insert(0, (start, [], 0))
     visited = []
@@ -305,6 +303,7 @@ class Agent(object):
         self.current_order = 0
         self.original_orders = {}  # dict van order number -> originele order
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
+        self.the_test_order = []
 
 
     #TODO: pad maken om heen te gaan naar een item en dan nieuw pad om terug te gaan naar laadplatform?
@@ -312,14 +311,14 @@ class Agent(object):
     #TODO: Beschouw pad als heen en terug ? -> momenteel wel!
     #TODO: elke beurt pad berekenen? -> momenteel niet
     def play(self): #kies actie
-        # if len(self.current_order == 0):
-        #     print("succes!")
-        if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
+        if len(self.the_test_order ) == 0:
+            print("succes! all orders fullfilled")
+        elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
         elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
-            self.deposit()
+            self.test_deposit() # self.deposit()
         elif len(self.chosen_items) == 0: #als je alle items hebt keer terug naar huis
             print("retrieved all orders")
             self.return_home()
@@ -332,10 +331,19 @@ class Agent(object):
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
+    def test_deposit(self):
+        print("!!!depositing!!!")
+        row, col = self.current_position
+        item = self.storage.pop()
+        loading_dock = self.grid.logic_grid[row][col].loading_dock
+        loading_dock.contents.append(item)
+        print("loading dock contents: ", loading_dock.contents)
+        for agent in self.other_agents:
+            agent.the_test_order.remove(item)
 
     def deposit(self):
         print("!!!depositing!!!")
-        print("orders: ", self.current)
+        print("current order: ", self.current_order)
         row, col = self.current_position
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
