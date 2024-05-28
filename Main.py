@@ -293,6 +293,33 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
+    def find_next_position(self): #maakt pad van de chosen items
+        locations = []
+        for item in self.chosen_items:
+            location = self.grid.find(item)
+            locations.append(location)
+        goal = locations[0]
+        current_location = self.current_position
+        Agenda = queue.PriorityQueue()
+        visited_states = []
+        Agenda.push((current_location, [], 0), 0)
+
+        while True:
+            if (not Agenda.empty()):
+                current_state, action_path, total_cost = Agenda.pop()
+                if current_state not in visited_states:
+                    visited_states.append(current_state)
+                    if goal == current_state:
+                        return action_path
+                    for successor in neighbours(current_state):
+                        newActions = action_path + [action]
+                        heuristic_Value = heuristic(successor, problem)
+                        cost_No_Heuristic = total_cost + stepcost
+                        new_Heuristic_Cost = cost_No_Heuristic + heuristic_Value
+                        Agenda.push((successor, newActions, cost_No_Heuristic), new_Heuristic_Cost)
+                else:
+                    continue
+
     def move(self, position):
         #bepaald welk object moet gekozen worden
         #construeert pad en geeft de beste next position weer
