@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import tkinter as tk
 import random
 import math
+import heapq
 import queue
 
 def random_action(list_of_items):
@@ -202,34 +203,18 @@ class Grid(object):  # het logische grid
             for agent in self.agents:
                 agent.play()
 
-def heuristic(a, b):
+def manhattend(a, b): #manhatten
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 def neighbours(loc): #nodig voor a star
     return ((loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1))
 
-def find_next_position(self): #voorbeeld om selct next move toe te passen
-     while True:
-        if (not Agenda.empty()):
-            current_state, action_path, total_cost = Agenda.pop()
-            if current_state not in visited_states:
-                visited_states.append(current_state)
-                if goal == current_state:
-                    return action_path
-                for successor in neighbours(current_state):
-                    newActions = action_path + [action]
-                    heuristic_Value = heuristic(successor, problem)
-                    cost_No_Heuristic = total_cost + stepcost
-                    new_Heuristic_Cost = cost_No_Heuristic + heuristic_Value
-                    Agenda.push((successor, newActions, cost_No_Heuristic), new_Heuristic_Cost)
-            else:
-                continue
 def astar(grid, start, goal): # maakt een pad tussen start en goal
     agenda = queue.PriorityQueue()
-    agenda.push((start, [], 0), 0)
+    agenda.put((0, (start, [], 0)))
     visited = []
     while True:
         if not agenda.empty():
-            current_pos, path, cost = agenda.pop()
+            current_pos, path, cost = agenda.get()
             if not current_pos in visited:
                 visited.append(current_pos)
                 if current_pos == goal:
@@ -239,7 +224,7 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)
                     total_cost = cost + heuristic
-                    agenda.push((neighbour, new_path, cost), total_cost)
+                    agenda.put((total_cost, (neighbour, new_path, cost)))
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
