@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
 import random
+import math
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -233,7 +234,7 @@ class Agent(object):
         self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
         self.capacity = capacity #storage van een agent
         self.storage = [] # wat zit er al in de storage
-        self.strategy = strategy #welke strategie
+        self.strategy = strategy_1 #welke strategie op dit moment strat 1 is selected
         self.grid: Grid = grid # logic grid
         self.path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
         self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
@@ -264,7 +265,6 @@ class Agent(object):
     def make_path(self):
         pass
 
-
     def pick_up(self):
         row, col = self.current_position
         item = self.grid.logic_grid[row][col].item
@@ -293,7 +293,11 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def move(self, position): #checkt of je ergens effectief naar toe kan en beweegt en verwijderd uit pad
+    def move(self, position):
+        #bepaald welk object moet gekozen worden
+        #construeert pad en geeft de beste next position weer
+        #checkt of je ergens effectief naar toe kan en beweegt en past zich aan
+        #returns de beste next position
         new_row, new_col = position
         if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
             self.path.remove(position)
