@@ -5,7 +5,27 @@ import tkinter as tk
 import random
 import math
 import heapq
-import queue
+#import queue
+
+class PriorityQueue:
+    def __init__(self):
+        self.storage = []
+
+    def insert(self, priority, item):
+        self.storage.append((priority, item))
+
+    def serve(self):
+        if len(self.storage) == 0:
+            return print("No items left to serve")
+        else:
+            item = min(self.storage, key=lambda tuple: tuple[0])
+            self.storage.remove(item)
+            return item[1]
+
+    def empty(self):
+        if len(self.storage) == 0:
+            return True
+        else: return False
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -195,7 +215,7 @@ class Grid(object):  # het logische grid
 
     def broadcast_order(self, order): # laat aan elke agent weten wat de order is
         for agent in self.agents:
-            agent.available.append(order)
+            agent.available += order
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self): # roept play op bij elke agent
@@ -209,12 +229,12 @@ def neighbours(loc): #nodig voor a star
     return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal
-    agenda = queue.PriorityQueue()
-    agenda.put((0, (start, [], 0)))
+    agenda = PriorityQueue()
+    agenda.insert(0, (start, [], 0))
     visited = []
     while True:
         if not agenda.empty():
-            current_pos, path, cost = agenda.get()
+            current_pos, path, cost = agenda.serve()
             if not current_pos in visited:
                 visited.append(current_pos)
                 if current_pos == goal:
@@ -224,7 +244,7 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)
                     total_cost = cost + heuristic
-                    agenda.put((total_cost, (neighbour, new_path, cost)))
+                    agenda.insert(total_cost, (neighbour, new_path, cost))
 
 def move_right(pos, next_pos, grid_size):
     pot_next_pos = []
