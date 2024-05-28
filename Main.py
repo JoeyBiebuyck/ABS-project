@@ -238,7 +238,8 @@ def move_right(pos, next_pos, grid_size):
         pot_next_pos = [pos[0] - 1, pos[1]]
 
     if out_of_bounds(pot_next_pos, grid_size):
-        return None
+        return pos
+    else: return pot_next_pos
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
@@ -328,8 +329,6 @@ class Agent(object):
         for agent in self.other_agents:
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
-
-
 
     def select_next_move(self):
         #construeert pad en geeft de beste next position weer
