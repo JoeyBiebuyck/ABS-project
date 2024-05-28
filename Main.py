@@ -139,10 +139,13 @@ class Grid(object):  # het logische grid
         item = self.logic_grid[row][col].item
         return item in list_of_items
 
-    def is_loading_dock(self, position, agent): # loading dok is specifiek aan een agent is
+    def is_loading_dock(self, position, agent):  # de positie een loading dock van een agent is
         row, col = position
         loading_dock = self.logic_grid[row][col].loading_dock
-        return loading_dock.agent == agent
+        if loading_dock is not None:
+            owner_of_dock = loading_dock.agent
+            if owner_of_dock is not None:
+                return loading_dock.agent == agent
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
@@ -219,9 +222,10 @@ class Grid(object):  # het logische grid
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self): # roept play op bij elke agent
-        while True:
+        for _ in range(20):
             for agent in self.agents:
                 agent.play()
+                self.grid_ui.update_ui(self.logic_grid)
 
 def manhattend(a, b): #manhatten
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
@@ -229,6 +233,7 @@ def neighbours(loc): #nodig voor a star
     return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal
+    print("goal is: ", goal)
     agenda = PriorityQueue()
     agenda.insert(0, (start, [], 0))
     visited = []
@@ -291,7 +296,7 @@ class Agent(object):
         self.storage = [] # wat zit er al in de storage
         self.strategy = strategy_1 #welke strategie op dit moment strat 1 is selected
         self.grid: Grid = grid # logic grid
-        self.path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
+        self.return_path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
         self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
         self.chosen_items: list[Product] = []# items die agent zelf koos
         self.selected_item = False #item dat de agent momemteel achter gaat
@@ -315,6 +320,9 @@ class Agent(object):
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
             self.deposit()
+        elif len(self.chosen_items) == 0:
+            print("retrieved all orders")
+            self.return_home()
         else:
             self.select_next_move() #we bepalen naar waar de agent moet bewegen.
 
@@ -329,6 +337,7 @@ class Agent(object):
         self.selected_item = False
 
     def deposit(self):
+        print("!!!depositing!!!")
         row, col = self.current_position
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
@@ -355,21 +364,32 @@ class Agent(object):
         #checkt of je ergens effectief naar toe kan en beweegt en past zich aan
         #returns de beste next position
         #new_row, new_col = position
+        print("selecting move!!!")
         pos_chosen_items = []
         distance_to_available_items = []
-        if not self.selected_item: # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
+        if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
             for item in self.chosen_items: #gebruiken twee for loops om het dichtste object te kiezen.
                 position_object = self.grid.items_to_pos_dict.get(item)
                 pos_chosen_items.append(position_object)
+
             for pos in pos_chosen_items:
-                distance_to_available_items.append(math.dist(pos, self.current_position))
-            self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+                distance_to_available_items.append(math.dist(self.current_position, pos))
+            if len(distance_to_available_items) != 0:
+                self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
 
         # start and goal position for a star
+
         start = self.current_position
+        print("selected item: ", self.selected_item)
         goal = self.grid.items_to_pos_dict.get(self.selected_item)
         path = astar(self.grid.logic_grid, start, goal)
+        if self.current_position == self.starting_position:
+            print("constructing return path!!!")
+            self.return_path = path
         first_position = path[0]
+        print("current position is", self.current_position)
+        print("first position: ", first_position)
+        print("path is: ", path)
         new_row, new_col = first_position
 
 
@@ -380,7 +400,7 @@ class Agent(object):
                 self.grid.logic_grid[new_row][new_col].agent = self
                 self.current_position = first_position
                 self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
-            else: print("error path out of bounds!!!!!")
+            else: print("!!!!!error path out of bounds!!!!!")
         elif adjacent(self.current_position, first_position):
             alternative_postion = move_right(self.current_position, first_position, self.grid.size)
             curr_row, curr_col = alternative_postion
@@ -388,9 +408,23 @@ class Agent(object):
             self.grid.logic_grid[new_row][new_col].agent = self
             self.current_position = alternative_postion
             self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
-        else: print("error not adjacent to position!!")
+        else: print("!!!!!!!error not adjacent to position!!")
 
-
+    def return_home(self):
+        print("returning home!!!")
+        print("current returning position is: ",self.current_position)
+        return_path = astar(self.grid.logic_grid, self.current_position, self.starting_position)
+        next_pos = return_path[0]
+        new_row, new_col = next_pos
+        if not out_of_bounds(next_pos, self.grid.size):
+            curr_row, curr_col = self.current_position
+            self.grid.logic_grid[curr_row][curr_col].agent = None
+            self.grid.logic_grid[new_row][new_col].agent = self
+            self.current_position = return_path[0]
+            self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+            print("returnpath is: ", return_path)
+        else:
+            print("error path out of bounds!!!!!")
     def next_order(self):
         if self.highest_order > self.current_order:
             self.current_order += 1
@@ -421,7 +455,7 @@ class Position(object):
 def adjacent(pos1, pos2):
     row1, col1 = pos1
     row2, col2 = pos2
-    return abs(row1 - row2) == 1 ^ abs(col1 - col2) == 1
+    return abs(row1 - row2) <= 1 ^ abs(col1 - col2) <= 1
 
 def out_of_bounds(pos, size):
     row, col = pos
@@ -480,9 +514,10 @@ if __name__ == "__main__":
     main_grid.init_agents()
     main_grid.populate_grid()
     main_grid.broadcast_order(order)
-    main_grid.play()
 
+    main_grid.play()
+    main_grid.grid_ui.mainloop()
 
 
     # my_print(logic_grid.logic_grid)
-    main_grid.grid_ui.mainloop()
+
