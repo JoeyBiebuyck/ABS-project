@@ -228,8 +228,8 @@ class Agent(object):
     def play(self): #kies actie
         if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
-        elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
-            self.make_path()
+        # elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
+        #     self.make_path()
         elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
