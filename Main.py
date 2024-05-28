@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import tkinter as tk
 import random
 import math
+import queue
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -203,8 +204,42 @@ class Grid(object):  # het logische grid
 
 def heuristic(a, b):
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
-def neighbours(location):
-    return ((location[0]-1, location[1]), (location[0]+1, location[1]), (location[0], location[1]+1), (location[0], location[1]-1))
+def neighbours(loc): #nodig voor a star
+    return ((loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1))
+
+def find_next_position(self): #voorbeeld om selct next move toe te passen
+     while True:
+        if (not Agenda.empty()):
+            current_state, action_path, total_cost = Agenda.pop()
+            if current_state not in visited_states:
+                visited_states.append(current_state)
+                if goal == current_state:
+                    return action_path
+                for successor in neighbours(current_state):
+                    newActions = action_path + [action]
+                    heuristic_Value = heuristic(successor, problem)
+                    cost_No_Heuristic = total_cost + stepcost
+                    new_Heuristic_Cost = cost_No_Heuristic + heuristic_Value
+                    Agenda.push((successor, newActions, cost_No_Heuristic), new_Heuristic_Cost)
+            else:
+                continue
+def astar(grid, start, goal): # maakt een pad tussen start en goal
+    agenda = queue.PriorityQueue()
+    agenda.push((start, [], 0), 0)
+    visited = []
+    while True:
+        if not agenda.empty():
+            current_pos, path, cost = agenda.pop()
+            if not current_pos in visited:
+                visited.append(current_pos)
+                if current_pos == goal:
+                    return path
+                for neighbour in neighbours(current_pos):
+                    cost = cost + 1
+                    new_path = path + [neighbour]
+                    heuristic = math.dist(neighbour, goal)
+                    total_cost = cost + heuristic
+                    agenda.push((neighbour, new_path, cost), total_cost)
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
@@ -293,32 +328,7 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def find_next_position(self): #voorbeeld om selct next move toe te passen
-        locations = []
-        for item in self.chosen_items:
-            location = self.grid.find(item)
-            locations.append(location)
-        goal = locations[0]
-        current_location = self.current_position
-        Agenda = queue.PriorityQueue()
-        visited_states = []
-        Agenda.push((current_location, [], 0), 0)
 
-        while True:
-            if (not Agenda.empty()):
-                current_state, action_path, total_cost = Agenda.pop()
-                if current_state not in visited_states:
-                    visited_states.append(current_state)
-                    if goal == current_state:
-                        return action_path
-                    for successor in neighbours(current_state):
-                        newActions = action_path + [action]
-                        heuristic_Value = heuristic(successor, problem)
-                        cost_No_Heuristic = total_cost + stepcost
-                        new_Heuristic_Cost = cost_No_Heuristic + heuristic_Value
-                        Agenda.push((successor, newActions, cost_No_Heuristic), new_Heuristic_Cost)
-                else:
-                    continue
 
     def select_next_move(self):
         #construeert pad en geeft de beste next position weer
@@ -327,6 +337,7 @@ class Agent(object):
         #new_row, new_col = position
         pos_chosen_items = []
         distance_to_available_items = []
+        selected_item = False
         for item in self.chosen_items: #gebruiken twee for loops om het dichtste object te kiezen.
             # print("item: ", item)
             position_object = self.grid.items_to_pos_dict.get(item)
@@ -335,7 +346,10 @@ class Agent(object):
             # print("position: ", pos)
             distance_to_available_items.append(math.dist(pos, self.current_position))
             # print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
-        return self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+        selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+        # start and goal position for a star
+        start = self.current_position
+        goal = self.grid.items_to_pos_dict.get(selected_item)
 
 
         # if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
