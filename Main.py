@@ -256,7 +256,7 @@ class Agent(object):
         if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
         elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
-            self.make_path()
+            self.find_next_position()
         elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
@@ -264,7 +264,7 @@ class Agent(object):
         else:
             self.move(self.path[0]) #eerste coordinaat in path
 
-    def make_path(self): #maakt pad van de chosen items
+    def find_next_position(self): #maakt pad van de chosen items
         locations = []
         for item in self.chosen_items:
             location = self.grid.find(item)
