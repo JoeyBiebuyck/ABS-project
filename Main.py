@@ -312,22 +312,19 @@ class Agent(object):
     #TODO: Beschouw pad als heen en terug ? -> momenteel wel!
     #TODO: elke beurt pad berekenen? -> momenteel niet
     def play(self): #kies actie
+        # if len(self.current_order == 0):
+        #     print("succes!")
         if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
-        # elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
-        #     self.make_path()
         elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
             self.deposit()
-        elif len(self.chosen_items) == 0:
+        elif len(self.chosen_items) == 0: #als je alle items hebt keer terug naar huis
             print("retrieved all orders")
             self.return_home()
         else:
             self.select_next_move() #we bepalen naar waar de agent moet bewegen.
-
-    def make_path(self):
-        pass
 
     def pick_up(self):
         row, col = self.current_position
@@ -338,6 +335,7 @@ class Agent(object):
 
     def deposit(self):
         print("!!!depositing!!!")
+        print("orders: ", self.current)
         row, col = self.current_position
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
