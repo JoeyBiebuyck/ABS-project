@@ -1,9 +1,6 @@
 import numpy as np
 import random
 import math
-import threading
-import time
-import logic_grid
 
 class PriorityQueue:
     def __init__(self):
@@ -80,11 +77,6 @@ def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item
     col = random.randint(min_col, max_col)
     return (row, col)
 
-def initialize_grid(size, product_list):
-    positions = build_dictionary(product_list, size)
-    grid = logic_grid.Grid(positions, size)
-    grid.populate_grid()
-    return grid
 
 def generate_order(lijst_van_producten, length_of_order=6):
     order = []

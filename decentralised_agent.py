@@ -56,17 +56,6 @@ class Agent(object):
         self.storage.append(item)
         self.selected_item = False
 
-    # def test_deposit(self):  # geeft item af aan loading dock en werkt met de test order
-    #     print("!!!depositing!!!")
-    #     row, col = self.current_position
-    #     item = self.storage.pop()
-    #     loading_dock = self.grid.logic_grid[row][col].loading_dock
-    #     loading_dock.contents.append(item)
-    #     print("loading dock contents: ", loading_dock.contents)
-    #     self.the_test_order.remove(item)  # item verwijderen bij zichzelf
-    #     for agent in self.other_agents:  # item verwijderen bij alle andere agents
-    #         agent.the_test_order.remove(item)
-
     def deposit(self):  # geeft item af aan een loading dock
         print(self.name, " depositing")
         print("current order: ", self.current_order, "\n")
