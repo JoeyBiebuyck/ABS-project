@@ -3,6 +3,7 @@ import strategies
 import util
 import grid_classes
 import logic_grid
+#TODO initialize voor de bigdog en smaalbrain agents
 #TODO make it easy to switch between centralised and decentralised
 #TODO standaard testen maken voor de onderzoeksvraag
 #TODO counter voor de efficientie

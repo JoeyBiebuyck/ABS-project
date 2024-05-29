@@ -1,10 +1,15 @@
 #TODO add centralised agent
 #TODO implement centralised agent
+#TODO heel veel van de functies kunnen naar util verhuizen???
+import grid_classes
+import math
+import util
+import following_agent
 class bigDogAgent(object):
     def __init__(self, grid, choosing_strategy, move_strategy):
-        self.agents: list[Agent] = []
-        self.order: list[Product] = []
-        self.available: list[Product] = [] # initieel gelijk aan de order
+        self.agents: list[following_agent.small_brain_agent] = []
+        self.order: list[grid_classes.Product] = []
+        self.available: list[grid_classes.Product] = [] # initieel gelijk aan de order
         self.choosing_strategy = choosing_strategy
         self.move_strategy = move_strategy
         self.grid = grid
@@ -13,7 +18,7 @@ class bigDogAgent(object):
         agents_with_space = filter(lambda agent: agent.chosen_items < agent.capacity, agents)
         while len(agents_with_space) != 0 or self.available != 0: # voor elke agent dat nog items kan kiezen
             for agent in agents_with_space:
-                item = self.choosing_strategy(available_items) #TODO vraag: zijn we zeker dat de items niet dubbel gekozen worden?
+                item = self.choosing_strategy(available_items) #TODO vraag: zijn we zeker dat de items niet dubbel gekozen worden? Dit zou moeten inorde zijn, grtjs os
                 agent.add_item_to_chosen(item)
 
     def assign_move(self, agents):
@@ -22,11 +27,10 @@ class bigDogAgent(object):
             agent.move(self.calculate_best_move(agent))
 
 
-    #TODO: Maak valid moves!
-    def euclidean_distance(self, position1, position2):
-        return math.sqrt((position1[0] - position2[0])**2 + (position1[1] - position2[1])**2)
+    #valid moves zit in util.py
+    #euclidian distance ook
     def calculate_best_move(self, agent): #TODO: Afhankelijk van de afstand naar item, 1kruisende paden, en borders.
-        legal_moves = valid_moves(agent,self.grid)
+        legal_moves = util.valid_moves(agent,self.grid)
         best_move = None
         best_score = 0
         for move in legal_moves:
@@ -36,13 +40,11 @@ class bigDogAgent(object):
                 best_move = move
         return best_move
 
-
     def distance_to_item_score(self, distance):
         if distance == 0:
             return 100
         else:
             return max (0, 50 - distance)
-
 
     def distance_to_item(self, position, list_of_items):
         list_of_positions = zip(list_of_items, map(lambda item_pos: self.euclidean_distance(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))

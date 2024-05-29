@@ -119,9 +119,15 @@ def build_dictionary(lijst_van_producten, grid_size): # bouwt item to position d
                 break
     return dict
 
+def adjacent_positions(position):
+    row, col = position
+    return [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]
 def valid_moves(agent, grid):  # generate alle valid moves voor een agent
     row = 0
     col = 1
     return filter(lambda position: adjacent(position, agent.current_position) and grid.logic_grid[position[row]][
         position[col]].agent is None and not out_of_bounds(position, grid.size),
                   adjacent_positions(agent.current_position))
+
+def euclidean_distance(self, position1, position2):
+    return math.sqrt((position1[0] - position2[0])**2 + (position1[1] - position2[1])**2)
