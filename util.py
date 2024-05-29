@@ -119,3 +119,9 @@ def build_dictionary(lijst_van_producten, grid_size): # bouwt item to position d
                 break
     return dict
 
+def valid_moves(agent, grid):  # generate alle valid moves voor een agent
+    row = 0
+    col = 1
+    return filter(lambda position: adjacent(position, agent.current_position) and grid.logic_grid[position[row]][
+        position[col]].agent is None and not out_of_bounds(position, grid.size),
+                  adjacent_positions(agent.current_position))
