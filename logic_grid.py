@@ -1,7 +1,4 @@
 import numpy as np
-import random
-import math
-import threading
 import time
 import util
 import grid_classes

@@ -1,13 +1,5 @@
-import numpy as np
 import random
 import tkinter as tk
-import math
-import threading
-import time
-import util
-import grid_classes
-import decentralised_agent
-import logic_grid
 
 class GridUI(tk.Tk):  # voor de visualisatie
     def __init__(self, size, cell_size):

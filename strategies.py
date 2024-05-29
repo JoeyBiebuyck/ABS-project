@@ -1,8 +1,4 @@
-import numpy as np
-import random
 import math
-import threading
-import time
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []

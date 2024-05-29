@@ -1,15 +1,7 @@
-from enum import Enum
-import numpy as np
-from matplotlib import pyplot as plt
-import tkinter as tk
-import random
-import math
 import threading
-import time
 import strategies
 import util
 import grid_classes
-import decentralised_agent
 import logic_grid
 
 

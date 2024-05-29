@@ -1,5 +1,4 @@
 import decentralised_agent
-
 class Product(object):
     def __init__(self, name, weight=0, height=0, width=0, depth=0):
         self.name = name

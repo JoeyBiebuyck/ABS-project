@@ -1,10 +1,5 @@
-import numpy as np
-import random
 import math
-import threading
-import time
 import util
-import strategies
 import grid_classes
 import logic_grid
 class Agent(object):
