@@ -27,12 +27,13 @@ def random_action(list_of_items):
 
 def manhattandistance(a, b): # berekent manhattan distance
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
+
 def neighbours(loc, grid):  # nodig voor A-star, basically successor
  #   return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None, filter(lambda coordinate: not out_of_bounds(coordinate, grid.size), [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]))
      return filter(lambda coordinate: not out_of_bounds(coordinate, grid.size),
                       [(loc[0] - 1, loc[1]), (loc[0] + 1, loc[1]), (loc[0], loc[1] + 1), (loc[0], loc[1] - 1)])
 
-def astar(grid, start, goal): # maakt een pad tussen start en goal
+def astar(grid, start, goal): # maakt een pad tussen start en goal TODO: fix that shit
     agenda = PriorityQueue()
     agenda.insert(0, (start, [], 0))
     visited = []

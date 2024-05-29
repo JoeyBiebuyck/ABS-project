@@ -9,7 +9,7 @@ class Agent(object):
         self.other_agents: list[Agent] = []  # lijst van pointers naar de andere agenten
         self.capacity = capacity  # storage van een agent
         self.storage = []  # wat zit er al in de storage
-        self.strategy = strategy  # welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+        self.strategy = strategy  # welke strategie op dit moment strat 1 is selected
         self.grid: logic_grid.Grid = grid  # logic grid
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.chosen_items: list[grid_classes.Product] = []  # items die agent zelf koos
@@ -44,7 +44,7 @@ class Agent(object):
         else:
             self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
 
-    def pick_up(self): #raapt een item op
+    def pick_up(self): #raapt een item op #TODO remove from grid?
         row, col = self.current_position
         item: grid_classes.Product = self.grid.logic_grid[row][col].item
         self.chosen_items.remove(item)
@@ -77,7 +77,7 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.
+    def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.#TODO is move right nog nodig als astar deftig werkt?
         curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
         if util.adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
@@ -98,7 +98,7 @@ class Agent(object):
         else:
             print("!!!error not adjacent!!!")
 
-    def select_next_product_and_position(self):
+    def select_next_product_and_position(self): #TODO is het altijd het beste om eerst naar het dichste product te gaan?
         #construeert pad en geeft de beste next position weer
         #returns de beste next position en roept de move methode op.
         print("agent ", self.name, " is selecting next move!!!")

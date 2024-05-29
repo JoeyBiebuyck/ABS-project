@@ -22,23 +22,6 @@ class Grid(object):  # het logische grid
     def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
 
-    # def move_up(self, event):
-    #     row = event.y // self.cell_size
-    #     col = event.x // self.cell_size
-    #     print(row,col)
-    #     agent = self.logic_grid[row][col].agent
-    #     print(agent)
-    #     if agent is None:
-    #         print("none")
-    #     elif self.logic_grid[row][col].loading_dock is not None:
-    #         print("Loading_dock!")
-    #         agent.move((row - 1, col))
-    #         self.grid_ui.update_ui(self.logic_grid)
-    #
-    #     else:
-    #         agent.move((row - 1, col))
-    #         self.grid_ui.update_ui(self.logic_grid)
-
     def has_item(self, position, list_of_items): # kijkt of er op een positie een item die in list of items zit
         row, col = position
         item = self.logic_grid[row][col].item
