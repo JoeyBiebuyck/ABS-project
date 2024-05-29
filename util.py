@@ -3,6 +3,8 @@ import random
 import math
 import threading
 import time
+import logic_grid
+
 class PriorityQueue:
     def __init__(self):
         self.storage = []
@@ -23,8 +25,14 @@ class PriorityQueue:
             return True
         else: return False
 
-def neighbours(loc): #nodig voor a star, basicly succesor
-    return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
+def random_action(list_of_items):
+    return random.choice(list_of_items)
+
+def manhattandistance(a, b): # berekent manhattan distance
+    return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
+def neighbours(loc, grid):  # nodig voor A-star, basically successor
+    return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None, filter(lambda coordinate: not out_of_bounds(coordinate, grid.size), [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]))
+
 def astar(grid, start, goal): # maakt een pad tussen start en goal
     agenda = PriorityQueue()
     agenda.insert(0, (start, [], 0))
@@ -36,14 +44,14 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                 visited.append(current_pos)
                 if current_pos == goal:
                     return path
-                for neighbour in neighbours(current_pos):
+                for neighbour in neighbours(current_pos, grid):
                     cost = cost + 1
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)
                     total_cost = cost + heuristic
                     agenda.insert(total_cost, (neighbour, new_path, cost))
 
-def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de richting waar de agent in gaat
+def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de richting waar de agent in gaat
     pot_next_pos = []
     if next_pos[0] == pos[0] + 1:
         pot_next_pos = [pos[0], pos[1] + 1]
@@ -58,11 +66,6 @@ def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de ric
         return pos
     else: return pot_next_pos
 
-def manhattend(a, b): #manhatten
-    return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
-def random_action(list_of_items):
-    return random.choice(list_of_items)
-
 def adjacent(pos1, pos2):
     row1, col1 = pos1
     row2, col2 = pos2
@@ -76,6 +79,12 @@ def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item
     row = random.randint(min_row, max_row)
     col = random.randint(min_col, max_col)
     return (row, col)
+
+def initialize_grid(size, product_list):
+    positions = build_dictionary(product_list, size)
+    grid = logic_grid.Grid(positions, size)
+    grid.populate_grid()
+    return grid
 
 def generate_order(lijst_van_producten, length_of_order=6):
     order = []

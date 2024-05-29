@@ -10,7 +10,7 @@ import visual_grid
 
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, strategy=util.random_action, laadplatformen=2, nr_of_agents=2, cell_size=30):
-        self.agents = [decentralised_agent.Agent(self, strategy) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [decentralised_agent.Agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid: np.ndarray[np.ndarray[grid_classes.Position]] = np.array([np.array([grid_classes.Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = visual_grid.GridUI(size, cell_size)
@@ -18,11 +18,29 @@ class Grid(object):  # het logische grid
         self.cell_size = cell_size
         self.init_on_curr_pos = False    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
         self.running = True              # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
+        self.nr_of_orders = 0
 
         #self.grid_ui.canvas.bind("<Button-1>", self.move_up)
 
     def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
+
+    # def move_up(self, event):
+    #     row = event.y // self.cell_size
+    #     col = event.x // self.cell_size
+    #     print(row,col)
+    #     agent = self.logic_grid[row][col].agent
+    #     print(agent)
+    #     if agent is None:
+    #         print("none")
+    #     elif self.logic_grid[row][col].loading_dock is not None:
+    #         print("Loading_dock!")
+    #         agent.move((row - 1, col))
+    #         self.grid_ui.update_ui(self.logic_grid)
+    #
+    #     else:
+    #         agent.move((row - 1, col))
+    #         self.grid_ui.update_ui(self.logic_grid)
 
     def has_item(self, position, list_of_items): # kijkt of er op een positie een item die in list of items zit
         row, col = position
@@ -58,7 +76,9 @@ class Grid(object):  # het logische grid
             self.logic_grid[row][col].agent = agent
             print(f"Added agent at position ({row}, {col}) with loading dock")
 
-    def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
+   #     self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
+
+    def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen) TODO: moet aan de nieuwe uitbreidingen aangepast worden
         starting_positions = []
         current_positions = []
         old_choices = []
@@ -102,20 +122,29 @@ class Grid(object):  # het logische grid
             other_agents.remove(agent)
             agent.other_agents = other_agents
             agent.available += old_choices # voeg de gedepositte items toe aan de available items
+    #       self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
     def broadcast_order(self, order): # laat aan elke agent weten wat de order is
+        self.nr_of_orders += 1
         for agent in self.agents:
-            agent.available += order
-            agent.the_test_order += order
+            if self.nr_of_orders == 1:
+                agent.current_order = 1
+                agent.highest_order = 1
+                agent.available = order.copy()
+                agent.original_orders[agent.highest_order] = order.copy()
+                agent.developing_orders[agent.highest_order] = order.copy()
+            else:
+                agent.highest_order += 1
+                agent.original_orders[agent.highest_order] = order.copy()
+                agent.developing_orders[agent.highest_order] = order.copy()
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
-    def play(self): # roept play op bij elke agent
+    def play(self):  # roept play op bij elke agent
         while self.running:
             for agent in self.agents:
                 agent.play()
             self.grid_ui.update_ui(self.logic_grid)
-            time.sleep(0.4)
-        #    self.play()
+            time.sleep(0.1)
 
     def stop(self):
         self.running = False

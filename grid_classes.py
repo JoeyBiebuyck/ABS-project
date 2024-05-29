@@ -1,3 +1,5 @@
+import decentralised_agent
+
 class Product(object):
     def __init__(self, name, weight=0, height=0, width=0, depth=0):
         self.name = name
@@ -6,12 +8,12 @@ class Product(object):
 
 class Loading_Dock(object):
     def __init__(self, agent, position):
-        self.agent = agent
-        self.position = position
-        self.contents = []
+        self.agent: decentralised_agent.Agent = agent
+        self.position: (int, int) = position
+        self.contents: list[Product] = []
 
 class Position(object):
     def __init__(self):
-        self.agent = None
-        self.loading_dock = None
-        self.item = None
+        self.agent: decentralised_agent.Agent | None = None
+        self.loading_dock: Loading_Dock | None = None
+        self.item: Product | None = None
