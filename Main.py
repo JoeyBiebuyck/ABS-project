@@ -77,7 +77,6 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 y1 = y0 + self.cell_size
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
-
     def update_ui(self, logic_grid):
 
         # Redraw grid
