@@ -127,15 +127,21 @@ class Agent(object):
         # move methode oproepen om naar de volgende positie te gaan
         return next_pos
 
-    def return_home(self): #TODO:Moet move right nog gebruiken.
-        print(self.name, " is returning home!!!")
-        #path en next_positon bepalen
+    def return_home(self):
+        print("returning home!!!")
+        print("current returning position is: ", self.current_position)
         return_path = util.astar(self.grid, self.current_position, self.starting_position)
-        print("returnpath is: ", return_path, "\n")
-        # volgende positie die we willen bereiken.
         next_pos = return_path[0]
-        # move methode oproepen om naar de volgende positie te gaan
-        return next_pos
+        new_row, new_col = next_pos
+        if not util.out_of_bounds(next_pos, self.grid.size):
+            curr_row, curr_col = self.current_position
+            self.grid.logic_grid[curr_row][curr_col].agent = None
+            self.grid.logic_grid[new_row][new_col].agent = self
+            self.current_position = return_path[0]
+            self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+            print("returnpath is: ", return_path)
+        else:
+            print("error path out of bounds!!!!!")
 
     def next_order(self):
         print(self.name, " going to the next order")
