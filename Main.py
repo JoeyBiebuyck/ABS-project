@@ -228,16 +228,18 @@ class Grid(object):  # het logische grid
                 agent.play()
             self.grid_ui.update_ui(self.logic_grid)
             time.sleep(0.4)
-        #    self.play()
-
 
     def stop(self):
         self.running = False
 
-def manhattend(a, b): #manhatten
+
+def manhattandistance(a, b): # berekent manhattan distance
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
-def neighbours(loc): #nodig voor a star, basicly succesor
+
+
+def neighbours(loc):  # nodig voor A-star, basically successor
     return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
+
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal
     agenda = PriorityQueue()
@@ -257,7 +259,8 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                     total_cost = cost + heuristic
                     agenda.insert(total_cost, (neighbour, new_path, cost))
 
-def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de richting waar de agent in gaat
+
+def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de richting waar de agent in gaat
     pot_next_pos = []
     if next_pos[0] == pos[0] + 1:
         pot_next_pos = [pos[0], pos[1] + 1]
@@ -271,6 +274,7 @@ def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de ric
     if out_of_bounds(pot_next_pos, grid_size):
         return pos
     else: return pot_next_pos
+
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
@@ -297,15 +301,15 @@ class Agent(object):
     def __init__(self, grid, strategy, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
-        self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
-        self.capacity = capacity #storage van een agent
-        self.storage = [] # wat zit er al in de storage
-        self.strategy = strategy  #welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
-        self.grid: Grid = grid # logic grid
-        self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
-        self.chosen_items: list[Product] = []# items die agent zelf koos
-        self.selected_item = False #item dat de agent momemteel achter gaat
-        self.other_agents_choices: list[Product] = [] #items die andere agents kozen
+        self.other_agents: list[Agent] = []  # lijst van pointers naar de andere agenten
+        self.capacity = capacity  # storage van een agent
+        self.storage = []  # wat zit er al in de storage
+        self.strategy = strategy  # welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+        self.grid: Grid = grid  # logic grid
+        self.available: list[Product] = []  # items van de order die nog niet gereserveerd zijn
+        self.chosen_items: list[Product] = []  # items die agent zelf koos
+        self.selected_item = False  # item dat de agent momenteel achter gaat
+        self.other_agents_choices: list[Product] = []  # items die andere agents kozen
         self.highest_order = 0
         self.current_order = 0
         self.original_orders = {}  # dict van order number -> originele order
@@ -315,7 +319,7 @@ class Agent(object):
 
     def play(self): #kies actie
         if len(self.the_test_order) == 0:
-            print("succes! all orders fullfilled")
+            print("succes! all orders fulfilled")
         elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
         elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
@@ -330,7 +334,7 @@ class Agent(object):
 
     def pick_up(self): #raapt een item op
         row, col = self.current_position
-        item = self.grid.logic_grid[row][col].item
+        item: Product = self.grid.logic_grid[row][col].item
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
@@ -442,15 +446,15 @@ class Product(object):
 
 class Loading_Dock(object):
     def __init__(self, agent, position):
-        self.agent = agent
-        self.position = position
-        self.contents = []
+        self.agent: Agent = agent
+        self.position: (int, int) = position
+        self.contents: list[Product] = []
 
 class Position(object):
     def __init__(self):
-        self.agent = None
-        self.loading_dock = None
-        self.item = None
+        self.agent: Agent | None = None
+        self.loading_dock: Loading_Dock | None = None
+        self.item: Product | None= None
 
 def adjacent(pos1, pos2):
     row1, col1 = pos1
