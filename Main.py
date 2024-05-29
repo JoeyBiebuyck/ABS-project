@@ -350,8 +350,8 @@ class Agent(object):
             agent.the_test_order.remove(item)
 
     def deposit(self):  # geeft item af aan een loading dock
-        print("!!!depositing!!!")
-        print("current order: ", self.current_order)
+        print(self.name, " depositing")
+        print("current order: ", self.current_order, "\n")
         row, col = self.current_position
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
@@ -373,7 +373,7 @@ class Agent(object):
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def move (self, next_pos): #beweegt de agent naar next_pos, wijkt uit voor andere agenten.
+    def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.
         next_pos_row, next_pos_col = next_pos
         if adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
             # als er geen agent is gaan we gwn naar de volgende positie
@@ -387,18 +387,19 @@ class Agent(object):
                 print("!!!!!error next_post out of bounds!!!!!")
         elif adjacent(self.current_position, next_pos):
             # als er een agent is wijken we uit naar rechts.
-            alternative_postion = move_right(self.current_position, next_pos, self.grid.size)
-            curr_row, curr_col = alternative_postion
+            alternative_position = move_right(self.current_position, next_pos, self.grid.size)
+            curr_row, curr_col = alternative_position
             self.grid.logic_grid[curr_row][curr_col].agent = None
             self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
-            self.current_position = alternative_postion
+            self.current_position = alternative_position
             # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
-        else: print("!!!error not adjacent!!!")
+        else:
+            print("!!!error not adjacent!!!")
 
     def select_next_product_and_position(self):
         #construeert pad en geeft de beste next position weer
         #returns de beste next position en roept de move methode op.
-        print("selecting next move!!!")
+        print("agent ", self.name, " is selecting next move!!!")
         pos_chosen_items = []
         distance_to_available_items = []
         if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
@@ -410,7 +411,7 @@ class Agent(object):
             if len(distance_to_available_items) != 0:
                 #selected_item is het item waar we achter gaan
                 self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
-        print("selected item: ", self.selected_item)
+        print("selected item: ", self.selected_item.name)
 
         # start and goal position for a star
         start = self.current_position
@@ -420,15 +421,15 @@ class Agent(object):
         next_pos = path[0]
         print("current position is", self.current_position)
         print("next_pos: ", next_pos)
-        print("path is: ", path)
+        print("path is: ", path, "\n")
         # move methode oproepen om naar de volgende positie te gaan
         return next_pos
 
     def return_home(self): #TODO:Moet move right nog gebruiken.
-        print("returning home!!!")
+        print(self.name, " is returning home!!!")
         #path en next_positon bepalen
         return_path = astar(self.grid.logic_grid, self.current_position, self.starting_position)
-        print("returnpath is: ", return_path)
+        print("returnpath is: ", return_path, "\n")
         # volgende positie die we willen bereiken.
         next_pos = return_path[0]
         # move methode oproepen om naar de volgende positie te gaan
@@ -454,7 +455,7 @@ class Position(object):
     def __init__(self):
         self.agent: Agent | None = None
         self.loading_dock: Loading_Dock | None = None
-        self.item: Product | None= None
+        self.item: Product | None = None
 
 def adjacent(pos1, pos2):
     row1, col1 = pos1
