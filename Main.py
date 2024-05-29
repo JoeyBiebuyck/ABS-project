@@ -31,6 +31,14 @@ def random_action(list_of_items):
     return random.choice(list_of_items)
 
 
+def valid_moves(agent, grid):  # generate alle valid moves voor een agent
+    row = 0
+    col = 1
+    return filter(lambda position: adjacent(position, agent.current_position) and grid.logic_grid[position[row]][
+        position[col]].agent is None and not out_of_bounds(position, grid.size),
+                  adjacent_positions(agent.current_position))
+
+
 class GridUI(tk.Tk):  # voor de visualisatie
     def __init__(self, size, cell_size):
         super().__init__()
@@ -267,9 +275,67 @@ def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de ric
     elif next_pos[1] == pos[1] - 1:
         pot_next_pos = [pos[0] - 1, pos[1]]
 
-    if out_of_bounds(pot_next_pos, grid_size):
-        return pos
-    else: return pot_next_pos
+class bigDogAgent(object):
+    def __init__(self, grid, choosing_strategy, move_strategy):
+        self.agents: list[Agent] = []
+        self.order: list[Product] = []
+        self.available: list[Product] = [] # initieel gelijk aan de order
+        self.choosing_strategy = choosing_strategy
+        self.move_strategy = move_strategy
+        self.grid = grid
+
+    def assign_items(self, available_items, agents): # geeft alle agenten de items dat ze gaan moeten halen TODO: zet de agents_with_space als invoer idp van alle agents, zo kan je de conditional tak vermijden als je er geen hebt
+        agents_with_space = filter(lambda agent: agent.chosen_items < agent.capacity, agents)
+        while len(agents_with_space) != 0 or self.available != 0: # voor elke agent dat nog items kan kiezen
+            for agent in agents_with_space:
+                item = self.choosing_strategy(available_items) #TODO vraag: zijn we zeker dat de items niet dubbel gekozen worden?
+                agent.add_item_to_chosen(item)
+
+    def assign_move(self, agents):
+        agents_with_items = filter(lambda agent: len(agent.chosen_items) != 0, agents)
+        for agent in agents_with_items:
+            agent.move(self.calculate_best_move(agent))
+
+
+    #TODO: Maak valid moves!
+    def euclidean_distance(self, position1, position2):
+        return math.sqrt((position1[0] - position2[0])**2 + (position1[1] - position2[1])**2)
+    def calculate_best_move(self, agent): #TODO: Afhankelijk van de afstand naar item, 1kruisende paden, en borders.
+        legal_moves = valid_moves(agent,self.grid)
+        best_move = None
+        best_score = 0
+        for move in legal_moves:
+            move_score = self.evaluate_move(agent, move)
+            if move_score > best_score:
+                best_score = move_score
+                best_move = move
+        return best_move
+
+
+    def distance_to_item_score(self, distance):
+        if distance == 0:
+            return 100
+        else:
+            return max (0, 50 - distance)
+
+
+    def distance_to_item(self, position, list_of_items):
+        list_of_positions = zip(list_of_items, map(lambda item_pos: self.euclidean_distance(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))
+        nearest_item, distance_to_item = min(list_of_positions, key=lambda tuple: tuple[1])
+        return nearest_item, distance_to_item
+
+    def evaluate_move (self, agent, move): #TODO:  op basis van afstand naar een item
+        score_move = 0
+        x,y = agent.current_position
+        new_position_agent = move
+        nearest_item, distance_to_item = self.distance_to_item(new_position_agent, agent.chosen_items)
+
+        score_move += distance_to_item
+        return score_move
+
+        if out_of_bounds(pot_next_pos, grid_size):
+            return pos
+        else: return pot_next_pos
 
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
@@ -388,6 +454,21 @@ class Agent(object):
             self.current_position = alternative_postion
             # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
         else: print("!!!error not adjacent!!!")
+    def add_item_to_chosen(self, item): # voor centrale agent
+        self.chosen_items.append(item)
+        for agent in self.other_agents:
+            agent.other_agents_choices.append(item) # is misschien handig voor keuze maken over volgend item
+
+    def move(self, position): #checkt of je ergens effectief naar toe kan en beweegt en verwijderd uit pad
+        new_row, new_col = position
+        if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
+            self.path.remove(position)
+            if not out_of_bounds(position, self.grid.size):
+                curr_row, curr_col = self.current_position
+                self.grid.logic_grid[curr_row][curr_col].agent = None
+                self.grid.logic_grid[new_row][new_col].agent = self
+                self.current_position = position
+                self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
 
     def select_next_product_and_position(self):
         #construeert pad en geeft de beste next position weer
@@ -406,7 +487,7 @@ class Agent(object):
                 self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
         print("selected item: ", self.selected_item)
 
-        # start and goal position for a star
+         # start and goal position for a star
         start = self.current_position
         goal = self.grid.items_to_pos_dict.get(self.selected_item)
         path = astar(self.grid.logic_grid, start, goal)
@@ -509,7 +590,7 @@ if __name__ == "__main__":
     item3 = Product("item3")
 
     producten_lijst = [item1, item2, item3]
-    item_dict = build_dictionary(producten_lijst, grid_size)
+    item_dict = generate_positions(producten_lijst, grid_size)
     order = generate_order(producten_lijst)
     main_grid = Grid(item_dict, grid_size)
     main_grid.init_agents()
