@@ -103,7 +103,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, strategy=random_action, laadplatformen=2, nr_of_agents=2, cell_size=30):
-        self.agents = [Agent(self, strategy) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [Agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid: np.ndarray[np.ndarray[Position]] = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size, cell_size)
@@ -294,13 +294,13 @@ def strategy_1(available, chosen_items, other_agent_choices, current_position, p
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 class Agent(object):
-    def __init__(self, grid, strategy, capacity=2):
+    def __init__(self, grid, strategy, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
         self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
         self.capacity = capacity #storage van een agent
         self.storage = [] # wat zit er al in de storage
-        self.strategy = strategy_1 #welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+        self.strategy = strategy  #welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
         self.grid: Grid = grid # logic grid
         self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
         self.chosen_items: list[Product] = []# items die agent zelf koos
@@ -311,6 +311,7 @@ class Agent(object):
         self.original_orders = {}  # dict van order number -> originele order
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.the_test_order = []
+        self.name = name
 
     def play(self): #kies actie
         if len(self.the_test_order) == 0:
@@ -333,18 +334,18 @@ class Agent(object):
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
-    def test_deposit(self): #geeft item af aan laoding dock en werkt met de test order
+    def test_deposit(self):  # geeft item af aan laoding dock en werkt met de test order
         print("!!!depositing!!!")
         row, col = self.current_position
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
         print("loading dock contents: ", loading_dock.contents)
-        self.the_test_order.remove(item) #item verwijderen bij zichzelf
-        for agent in self.other_agents:  #item verwijderen bij alle andere agents
+        self.the_test_order.remove(item)  # item verwijderen bij zichzelf
+        for agent in self.other_agents:  # item verwijderen bij alle andere agents
             agent.the_test_order.remove(item)
 
-    def deposit(self): # geeft item af aan een laoding dock
+    def deposit(self):  # geeft item af aan een loading dock
         print("!!!depositing!!!")
         print("current order: ", self.current_order)
         row, col = self.current_position
@@ -512,7 +513,7 @@ if __name__ == "__main__":
     producten_lijst = [item1, item2, item3]
     item_dict = build_dictionary(producten_lijst, grid_size)
     order = generate_order(producten_lijst)
-    main_grid = Grid(item_dict, grid_size)
+    main_grid = Grid(item_dict, grid_size, strategy=strategy_1)
     main_grid.init_agents()
     main_grid.populate_grid()
     main_grid.broadcast_order(order)
