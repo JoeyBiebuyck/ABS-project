@@ -369,11 +369,12 @@ class Agent(object):
             agent.other_agents_choices.append(item)
 
     def move (self, next_pos): #beweegt de agent naar next_pos, wijkt uit voor andere agenten.
+        curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
         if adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
             # als er geen agent is gaan we gwn naar de volgende positie
             if not out_of_bounds(next_pos, self.grid.size):
-                curr_pos_row, curr_pos_col = self.current_position
+
                 self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
                 self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
                 self.current_position = next_pos
@@ -383,9 +384,9 @@ class Agent(object):
         elif adjacent(self.current_position, next_pos):
             # als er een agent is wijken we uit naar rechts.
             alternative_postion = move_right(self.current_position, next_pos, self.grid.size)
-            curr_row, curr_col = alternative_postion
-            self.grid.logic_grid[curr_row][curr_col].agent = None
-            self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
+            alt_next_pos_row, alt_next_pos_col = alternative_postion
+            self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
+            self.grid.logic_grid[alt_next_pos_row][alt_next_pos_col].agent = self
             self.current_position = alternative_postion
             # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
         else: print("!!!error not adjacent!!!")
