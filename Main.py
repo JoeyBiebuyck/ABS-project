@@ -497,7 +497,6 @@ def my_print(item):
             print("current coordinate = ", (y, x))
 
 def play_and_show_grid():
-    # Call main_grid.play() in a separate thread
     play_thread = threading.Thread(target=main_grid.play)
     play_thread.start()
 
