@@ -539,11 +539,13 @@ if __name__ == "__main__":
     producten_lijst = [item1, item2, item3]
     item_dict = build_dictionary(producten_lijst, grid_size)
     order = generate_order(producten_lijst)
+    order2 = generate_order(producten_lijst)
     main_grid = Grid(item_dict, grid_size, strategy=strategy_1)
     main_grid.init_agents()
     main_grid.populate_grid()
     print("THE ORDER HAS BEEN BROADCAST")
     main_grid.broadcast_order(order)
+    main_grid.broadcast_order(order2)
 
     play_grid_thread = threading.Thread(target=play_and_show_grid)
     play_grid_thread.start()
