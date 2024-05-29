@@ -52,7 +52,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
         # Redraw grid
         self.draw_grid()
-        images = ["pictures/apple.png", "pictures/peach.png", "pictures/banana.png", "pictures/strawberry.png"]
+        images = ["pictures/apple.png", "pictures/peach.png", "pictures/banana.png", "pictures/strawberry.png", "pictures/watermelon.png", "pictures/orange.png"]
 
         for i in range(self.size):
             for j in range(self.size):

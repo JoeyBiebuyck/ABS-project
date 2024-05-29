@@ -14,8 +14,11 @@ if __name__ == "__main__":
     item1 = grid_classes.Product("item1")
     item2 = grid_classes.Product("item2")
     item3 = grid_classes.Product("item3")
+    item4 = grid_classes.Product("item4")
+    item5 = grid_classes.Product("item5")
+    item6 = grid_classes.Product("item6")
 
-    producten_lijst = [item1, item2, item3]
+    producten_lijst = [item1, item2, item3, item4, item5, item6]
     item_dict = util.build_dictionary(producten_lijst, grid_size)
     order = util.generate_order(producten_lijst)
     main_grid = logic_grid.Grid(item_dict, grid_size, strategy=strategies.strategy_1, nr_of_agents=2)

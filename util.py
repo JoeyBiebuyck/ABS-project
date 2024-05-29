@@ -46,7 +46,7 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                 if current_pos == goal:
                     print("THE PATH WE FOUND IS: ", path)
                     if len(path) == 0:  # als er het pad 1 lang is, en er staat een agent op de goal, geef de huidige positie terug (de start positie) zodat de agent niet beweegt
-                        [start]
+                        return [start]
                     else:
                         return path
                 for neighbour in neighbours(current_pos, grid):
@@ -90,11 +90,14 @@ def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item
     return (row, col)
 
 
-def generate_order(lijst_van_producten, length_of_order=6):
+def generate_order(lijst_van_producten, length_of_order=6, unique=False):
     order = []
-    for _ in range(length_of_order):
-        order.append(random.choice(lijst_van_producten))
-    return order
+    if not unique:
+        for _ in range(length_of_order):
+            order.append(random.choice(lijst_van_producten))
+        return order
+    else:
+        return random.sample(lijst_van_producten, length_of_order)
 
 def my_print(item):
     row, col = item.shape
