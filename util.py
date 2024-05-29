@@ -37,16 +37,26 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
     while True:
         if not agenda.empty():
             current_pos, path, cost = agenda.serve()
+            print("start and finish: ", start, goal)
+            print("current path: ", path)
             if not current_pos in visited:
                 visited.append(current_pos)
                 if current_pos == goal:
-                    return path
+                    print("THE PATH WE FOUND IS: ", path)
+                    if len(path) == 0:  # als er het pad 1 lang is, en er staat een agent op de goal, geef de huidige positie terug (de start positie) zodat de agent niet beweegt
+                        [start]
+                    else:
+                        return path
                 for neighbour in neighbours(current_pos, grid):
                     cost = cost + 1
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)
                     total_cost = cost + heuristic
                     agenda.insert(total_cost, (neighbour, new_path, cost))
+        else:
+            print("SOMETHING WENT TERRIBLY WRONG")
+            print("")
+            break
 
 def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de richting waar de agent in gaat
     pot_next_pos = []

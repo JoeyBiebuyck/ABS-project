@@ -132,6 +132,7 @@ class Agent(object):
         print("current returning position is: ", self.current_position)
         return_path = util.astar(self.grid, self.current_position, self.starting_position)
         next_pos = return_path[0]
+        print("going to: ", next_pos)
         return next_pos
 
     def next_order(self):
