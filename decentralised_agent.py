@@ -132,16 +132,7 @@ class Agent(object):
         print("current returning position is: ", self.current_position)
         return_path = util.astar(self.grid, self.current_position, self.starting_position)
         next_pos = return_path[0]
-        new_row, new_col = next_pos
-        if not util.out_of_bounds(next_pos, self.grid.size):
-            curr_row, curr_col = self.current_position
-            self.grid.logic_grid[curr_row][curr_col].agent = None
-            self.grid.logic_grid[new_row][new_col].agent = self
-            self.current_position = return_path[0]
-            self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
-            print("returnpath is: ", return_path)
-        else:
-            print("error path out of bounds!!!!!")
+        return next_pos
 
     def next_order(self):
         print(self.name, " going to the next order")
