@@ -3,6 +3,29 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
 import random
+import math
+import threading
+import time
+
+class PriorityQueue:
+    def __init__(self):
+        self.storage = []
+
+    def insert(self, priority, item):
+        self.storage.append((priority, item))
+
+    def serve(self):
+        if len(self.storage) == 0:
+            return print("No items left to serve")
+        else:
+            item = min(self.storage, key=lambda tuple: tuple[0])
+            self.storage.remove(item)
+            return item[1]
+
+    def empty(self):
+        if len(self.storage) == 0:
+            return True
+        else: return False
 
 def random_action(list_of_items):
     return random.choice(list_of_items)
@@ -56,19 +79,22 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 
     def update_ui(self, logic_grid):
-        self.canvas.delete("all")
+
         # Redraw grid
         self.draw_grid()
+        images = ["apple.png", "peach.png", "banana.png", "strawberry.png"]
 
         for i in range(self.size):
             for j in range(self.size):
                 pos = logic_grid[i][j]
                 if pos.agent:
-                    self.add_image_to_grid(i, j, "Agent.png")
+                    self.add_image_to_grid(i, j, "agent.png")
                 elif pos.item:
-                    self.add_image_to_grid(i, j, "download.png") #item.png
+                    image = random.choice(images)
+                    images.remove(image)
+                    self.add_image_to_grid(i, j, image) #item.png
                 elif pos.loading_dock:
-                    self.add_image_to_grid(i, j, "Pits.png")
+                    self.add_image_to_grid(i, j, "loading_dock.png")
                 else:
                     if (i, j) in self.images:
                         self.canvas.delete(self.images[(i, j)])
@@ -83,8 +109,8 @@ class Grid(object):  # het logische grid
         self.grid_ui = GridUI(size, cell_size)
         self.size = size
         self.cell_size = cell_size
-        self.init_on_curr_pos = True    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
-                                        # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
+        self.init_on_curr_pos = False    # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
+        self.running = True              # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
 
         #self.grid_ui.canvas.bind("<Button-1>", self.move_up)
 
@@ -108,15 +134,18 @@ class Grid(object):  # het logische grid
     #         agent.move((row - 1, col))
     #         self.grid_ui.update_ui(self.logic_grid)
 
-    def hasItem(self, position, listOfItems): # kijkt of er op een positie een item die in list of items zit
+    def has_item(self, position, list_of_items): # kijkt of er op een positie een item die in list of items zit
         row, col = position
         item = self.logic_grid[row][col].item
-        return item in listOfItems
+        return item in list_of_items
 
-    def isLoadingDock(self, position, agent): # loading dok is specifiek aan een agent is
+    def is_loading_dock(self, position, agent):  # de positie een loading dock van een agent is
         row, col = position
         loading_dock = self.logic_grid[row][col].loading_dock
-        return loading_dock.agent == agent
+        if loading_dock is not None:
+            owner_of_dock = loading_dock.agent
+            if owner_of_dock is not None:
+                return loading_dock.agent == agent
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
@@ -135,24 +164,28 @@ class Grid(object):  # het logische grid
             print(f"Added item '{key}' at position ({row}, {col})")
         for agent in self.agents:  # populate de laadplekken en agenten
             row, col = agent.starting_position
-            self.logic_grid[row][col].loading_dock = LoadingDock(agent, agent.starting_position)
+            self.logic_grid[row][col].loading_dock = Loading_Dock(agent, agent.starting_position)
             self.logic_grid[row][col].agent = agent
             print(f"Added agent at position ({row}, {col}) with loading dock")
 
-        self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
+   #     self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
-    def update_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
+    def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen)
         starting_positions = []
         current_positions = []
+        old_choices = []
+
         for agent in old_agents:
-            self.agents.remove(agent)
+            self.agents.remove(agent) # haal de agent weg uit de lijst agenten
             curr_row, curr_col = agent.current_position
             starting_row, starting_col = agent.starting_position
-            starting_positions.append((starting_row, starting_col))
-            current_positions.append((curr_row, curr_col))
+            starting_positions.append((starting_row, starting_col)) # sla zijn startpositie op
+            current_positions.append((curr_row, curr_col))  # sla zijn huidige positie op
+            old_choices.append(agent.chosen_items) # alle items dat hij op zich had gaan verloren, onthou welke hij gereserveerd had
             self.logic_grid[curr_row][curr_col].agent = None
             self.logic_grid[starting_row][starting_col].loading_dock = None
-        if self.init_on_curr_pos: # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
+
+        if self.init_on_curr_pos:  # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
             positions = zip(starting_positions, current_positions)
             for agent in new_agents:
                 self.agents.append(agent)
@@ -162,7 +195,7 @@ class Grid(object):  # het logische grid
                     agent.current_position = current_pos
                     starting_row, starting_col = starting_pos
                     curr_row, curr_col = current_pos
-                    self.logic_grid[starting_row][starting_col].loading_dock = LoadingDock(agent, agent.starting_position)
+                    self.logic_grid[starting_row][starting_col].loading_dock = Loading_Dock(agent, agent.starting_position)
                     self.logic_grid[curr_row][curr_col].agent = agent
         else:
             positions = starting_positions
@@ -173,124 +206,244 @@ class Grid(object):  # het logische grid
                     agent.starting_position = starting_pos
                     agent.current_position = agent.starting_position
                     starting_row, starting_col = starting_pos
-                    self.logic_grid[starting_row][starting_col].loading_dock = LoadingDock(agent, agent.starting_position)
+                    self.logic_grid[starting_row][starting_col].loading_dock = Loading_Dock(agent, agent.starting_position)
                     self.logic_grid[starting_row][starting_col].agent = agent
+
         for agent in self.agents:
             other_agents = self.agents.copy()
             other_agents.remove(agent)
             agent.other_agents = other_agents
-        self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
+            agent.available += old_choices # voeg de gedepositte items toe aan de available items
+    #       self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
-    def broadcastOrder(self, order): # laat aan elke agent weten wat de order is
+    def broadcast_order(self, order): # laat aan elke agent weten wat de order is
         for agent in self.agents:
-            agent.available.append(order)
+            agent.available += order
+            agent.the_test_order += order
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self): # roept play op bij elke agent
-        while True:
+        while self.running:
             for agent in self.agents:
                 agent.play()
+            self.grid_ui.update_ui(self.logic_grid)
+            time.sleep(0.4)
+        #    self.play()
 
 
+    def stop(self):
+        self.running = False
+
+def manhattend(a, b): #manhatten
+    return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
+def neighbours(loc): #nodig voor a star, basicly succesor
+    return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
+
+def astar(grid, start, goal): # maakt een pad tussen start en goal
+    agenda = PriorityQueue()
+    agenda.insert(0, (start, [], 0))
+    visited = []
+    while True:
+        if not agenda.empty():
+            current_pos, path, cost = agenda.serve()
+            if not current_pos in visited:
+                visited.append(current_pos)
+                if current_pos == goal:
+                    return path
+                for neighbour in neighbours(current_pos):
+                    cost = cost + 1
+                    new_path = path + [neighbour]
+                    heuristic = math.dist(neighbour, goal)
+                    total_cost = cost + heuristic
+                    agenda.insert(total_cost, (neighbour, new_path, cost))
+
+def move_right(pos, next_pos, grid_size): #berekent de positie rechts van de richting waar de agent in gaat
+    pot_next_pos = []
+    if next_pos[0] == pos[0] + 1:
+        pot_next_pos = [pos[0], pos[1] + 1]
+    elif next_pos[0] == pos[0] - 1:
+        pot_next_pos = [pos[0], pos[1] - 1]
+    elif next_pos[1] == pos[1] + 1:
+        pot_next_pos = [pos[0] + 1, pos[1]]
+    elif next_pos[1] == pos[1] - 1:
+        pot_next_pos = [pos[0] - 1, pos[1]]
+
+    if out_of_bounds(pot_next_pos, grid_size):
+        return pos
+    else: return pot_next_pos
+
+def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
+    location_available_items = []
+    distance_to_available_items = []
+    for item in available:
+        #print("item: ", item)
+        location = product_locations_dictonairy.get(item)
+        location_available_items.append(location)
+
+    if len(other_agent_choices) == 0: #als er nog geen intentions zijn kiezen we het dichtste item
+        for pos in location_available_items:
+            #print("position: ", pos)
+            distance_to_available_items.append(math.dist(pos, current_position))
+            #print("return: ", available[(distance_to_available_items.index(min(distance_to_available_items)))])
+        return available[(distance_to_available_items.index(min(distance_to_available_items)))]
+    else:
+        for i in location_available_items:
+            #print("this is the location of an available item: ", i)
+            #print("this is the other agent choice: ", other_agent_choices[-1])
+            distance_to_available_items.append(math.dist(i, product_locations_dictonairy.get(other_agent_choices[-1])))
+        return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 class Agent(object):
-    def __init__(self, grid, strategy, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+    def __init__(self, grid, strategy, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
         self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
         self.capacity = capacity #storage van een agent
         self.storage = [] # wat zit er al in de storage
-        self.strategy = strategy #welke strategie
+        self.strategy = strategy_1 #welke strategie op dit moment strat 1 is selected TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
         self.grid: Grid = grid # logic grid
-        self.path = [] # het pad dat de agent moet volgen, sequentie van coordinaten, bevat alles van laadpunt terug tot aan zijn laadpunt
-        self.available: list[Item] = [] # items van de order die nog niet gereserveerd zijn
-        self.chosen_items: list[Item] = []# items die agent zelf koos
-        self.other_agents_choices: list[Item] = [] #items die andere agents kozen
-        self.highestOrder = 0
-        self.currentOrder = 0
-        self.originalOrders = {} # dict van order number -> originele order
-        self.developingOrders = {} # dict van order number -> items van de order dat nog niet gedeposit zijn
+        self.available: list[Product] = [] # items van de order die nog niet gereserveerd zijn
+        self.chosen_items: list[Product] = []# items die agent zelf koos
+        self.selected_item = False #item dat de agent momemteel achter gaat
+        self.other_agents_choices: list[Product] = [] #items die andere agents kozen
+        self.highest_order = 0
+        self.current_order = 0
+        self.original_orders = {}  # dict van order number -> originele order
+        self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
+        self.the_test_order = []
 
-
-    #TODO: pad maken om heen te gaan naar een item en dan nieuw pad om terug te gaan naar laadplatform?
-    #TODO: beurt of geen beurt om een item te pakken? -> momenteel wel beurt!
-    #TODO: Beschouw pad als heen en terug ? -> momenteel wel!
-    #TODO: elke beurt pad berekenen? -> momenteel niet
     def play(self): #kies actie
-        if self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
+        if len(self.the_test_order) == 0:
+            print("succes! all orders fullfilled")
+        elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0: # als je nog items kan "reserveren", doe dat
             self.choose_item()
-        elif len(self.path) == 0 and len(self.storage) == 0: # als je geen items meer kan reserveren en nog geen pad hebt, maak er een
-            self.make_path()
-        elif self.grid.hasItem(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+        elif self.grid.has_item(self.current_position, self.chosen_items): # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
-        elif self.grid.isLoadingDock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
-            self.deposit()
+        elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0: # als je op je loading dock bent, deposit je items
+            self.test_deposit() # self.deposit()
+        elif len(self.chosen_items) == 0: #als je alle items hebt keer terug naar huis
+            print("retrieved all orders")
+            self.move(self.return_home())
         else:
-            self.move(self.path[0]) #eerste coordinaat in path
+            self.move(self.select_next_product_and_position()) #we bepalen naar waar de agent moet bewegen.
 
-    def make_path(self):
-        pass
-
-
-    def pick_up(self):
+    def pick_up(self): #raapt een item op
         row, col = self.current_position
         item = self.grid.logic_grid[row][col].item
         self.chosen_items.remove(item)
         self.storage.append(item)
-
-    def deposit(self):
+        self.selected_item = False
+    def test_deposit(self): #geeft item af aan laoding dock en werkt met de test order
+        print("!!!depositing!!!")
         row, col = self.current_position
         item = self.storage.pop()
-        loadingDock = self.grid.logic_grid[row][col].loading_dock
-        loadingDock.contents.append(item)
-        curr_to_deposit = self.developingOrders[self.currentOrder]
+        loading_dock = self.grid.logic_grid[row][col].loading_dock
+        loading_dock.contents.append(item)
+        print("loading dock contents: ", loading_dock.contents)
+        self.the_test_order.remove(item) #item verwijderen bij zichzelf
+        for agent in self.other_agents:  #item verwijderen bij alle andere agents
+            agent.the_test_order.remove(item)
+
+    def deposit(self): # geeft item af aan een laoding dock
+        print("!!!depositing!!!")
+        print("current order: ", self.current_order)
+        row, col = self.current_position
+        item = self.storage.pop()
+        loading_dock = self.grid.logic_grid[row][col].loading_dock
+        loading_dock.contents.append(item)
+        curr_to_deposit = self.developing_orders[self.current_order]
         curr_to_deposit.remove(item)
-        self.developingOrders[self.currentOrder] = curr_to_deposit
+        self.developing_orders[self.current_order] = curr_to_deposit
         if len(curr_to_deposit) == 0: # laat iedereen naar het volgende order gaan als de andere compleet is TODO: laten we ze misschien al items van andere bestellingen verzamelen?
-            self.nextOrder()
+            self.next_order()
             for agent in self.other_agents:
-                agent.nextOrder()
+                agent.next_order()
 
 
-    def choose_item(self):
-        item = self.strategy(self.available)  # verander hier de keuze methode
+    def choose_item(self): #kiest een item a.d.h.v de strategie.
+        item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available.remove(item)
         self.chosen_items.append(item)
         for agent in self.other_agents:
             agent.available.remove(item)
             agent.other_agents_choices.append(item)
 
-    def move(self, position): #checkt of je ergens effectief naar toe kan en beweegt en verwijderd uit pad
-        new_row, new_col = position
-        if adjacent(self.current_position, position) and self.grid.logic_grid[new_row][new_col].agent is None:
-            self.path.remove(position)
-            if not outOfBounds(position, self.grid.size):
-                curr_row, curr_col = self.current_position
-                self.grid.logic_grid[curr_row][curr_col].agent = None
-                self.grid.logic_grid[new_row][new_col].agent = self
-                self.current_position = position
-                self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+    def move (self, next_pos): #beweegt de agent naar next_pos, wijkt uit voor andere agenten.
+        next_pos_row, next_pos_col = next_pos
+        if adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
+            # als er geen agent is gaan we gwn naar de volgende positie
+            if not out_of_bounds(next_pos, self.grid.size):
+                curr_pos_row, curr_pos_col = self.current_position
+                self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
+                self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
+                self.current_position = next_pos
+                # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+            else:
+                print("!!!!!error next_post out of bounds!!!!!")
+        elif adjacent(self.current_position, next_pos):
+            # als er een agent is wijken we uit naar rechts.
+            alternative_postion = move_right(self.current_position, next_pos, self.grid.size)
+            curr_row, curr_col = alternative_postion
+            self.grid.logic_grid[curr_row][curr_col].agent = None
+            self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
+            self.current_position = alternative_postion
+            # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
+        else: print("!!!error not adjacent!!!")
 
+    def select_next_product_and_position(self):
+        #construeert pad en geeft de beste next position weer
+        #returns de beste next position en roept de move methode op.
+        print("selecting next move!!!")
+        pos_chosen_items = []
+        distance_to_available_items = []
+        if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
+            for item in self.chosen_items: #gebruiken twee for loops om het dichtste object te kiezen.
+                position_object = self.grid.items_to_pos_dict.get(item)
+                pos_chosen_items.append(position_object)
+            for pos in pos_chosen_items:
+                distance_to_available_items.append(math.dist(self.current_position, pos))
+            if len(distance_to_available_items) != 0:
+                #selected_item is het item waar we achter gaan
+                self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+        print("selected item: ", self.selected_item)
 
-    def nextOrder(self):
-        if self.highestOrder > self.currentOrder:
-            self.currentOrder += 1
+        # start and goal position for a star
+        start = self.current_position
+        goal = self.grid.items_to_pos_dict.get(self.selected_item)
+        path = astar(self.grid.logic_grid, start, goal)
+        # volgende positie die we willen bereiken.
+        next_pos = path[0]
+        print("current position is", self.current_position)
+        print("next_pos: ", next_pos)
+        print("path is: ", path)
+        # move methode oproepen om naar de volgende positie te gaan
+        return next_pos
 
+    def return_home(self): #TODO:Moet move right nog gebruiken.
+        print("returning home!!!")
+        #path en next_positon bepalen
+        return_path = astar(self.grid.logic_grid, self.current_position, self.starting_position)
+        print("returnpath is: ", return_path)
+        # volgende positie die we willen bereiken.
+        next_pos = return_path[0]
+        # move methode oproepen om naar de volgende positie te gaan
+        return next_pos
 
+    def next_order(self):
+        if self.highest_order > self.current_order:
+            self.current_order += 1
 
-class Item(object):
+class Product(object):
     def __init__(self, name, weight=0, height=0, width=0, depth=0):
         self.name = name
         self.weight = weight
         self.volume = height * width * depth
 
-
-class LoadingDock(object):
+class Loading_Dock(object):
     def __init__(self, agent, position):
         self.agent = agent
         self.position = position
         self.contents = []
-
 
 class Position(object):
     def __init__(self):
@@ -298,23 +451,22 @@ class Position(object):
         self.loading_dock = None
         self.item = None
 
-
 def adjacent(pos1, pos2):
     row1, col1 = pos1
     row2, col2 = pos2
-    return abs(row1 - row2) == 1 ^ abs(col1 - col2) == 1
+    return abs(row1 - row2) <= 1 ^ abs(col1 - col2) <= 1
 
-def outOfBounds(pos, size):
+def out_of_bounds(pos, size):
     row, col = pos
     return row < 0 or row > size-1 or col < 0 or col > size-1
 
-
-def generate_positions(lijst_van_producten, grid_size): # bouwt item to position dictionary
+def build_dictionary(lijst_van_producten, grid_size): # bouwt item to position dictionary
     dict = {}
     taken_pos: list[(int, int)] = []
     for product in lijst_van_producten:
         while True:
-            new_pos = generate_position(0, grid_size - 2, 0, grid_size - 1)  # onderste rij is gereserveerd voor load docks
+            new_pos = generate_random_coordinate(0, grid_size - 2, 0,
+                                                 grid_size - 1)  # onderste rij is gereserveerd voor load docks
             if new_pos not in taken_pos:
                 taken_pos.append(new_pos)
                 dict[product] = new_pos
@@ -322,17 +474,15 @@ def generate_positions(lijst_van_producten, grid_size): # bouwt item to position
     return dict
 
 def initialize_grid(size, product_list):
-    positions = generate_positions(product_list, size)
+    positions = build_dictionary(product_list, size)
     grid = Grid(positions, size)
     grid.populate_grid()
     return grid
 
-
-def generate_position(min_row, max_row, min_col, max_col): # bouwt item to position dictionary
+def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item to position dictionary
     row = random.randint(min_row, max_row)
     col = random.randint(min_col, max_col)
     return (row, col)
-
 
 def generate_order(lijst_van_producten, length_of_order=6):
     order = []
@@ -340,29 +490,36 @@ def generate_order(lijst_van_producten, length_of_order=6):
         order.append(random.choice(lijst_van_producten))
     return order
 
-
 def my_print(item):
     row, col = item.shape
     for y in range(row):
         for x in range(col):
             print("current coordinate = ", (y, x))
 
+def play_and_show_grid():
+    # Call main_grid.play() in a separate thread
+    play_thread = threading.Thread(target=main_grid.play)
+    play_thread.start()
+
+
 
 if __name__ == "__main__":
+
     grid_size = 5
-    item1 = Item("item1")
-    item2 = Item("item2")
-    item3 = Item("item3")
+    item1 = Product("item1")
+    item2 = Product("item2")
+    item3 = Product("item3")
+
     producten_lijst = [item1, item2, item3]
-    item_dict = generate_positions(producten_lijst, grid_size)
+    item_dict = build_dictionary(producten_lijst, grid_size)
     order = generate_order(producten_lijst)
     main_grid = Grid(item_dict, grid_size)
     main_grid.init_agents()
     main_grid.populate_grid()
-    main_grid.broadcastOrder(order)
-    main_grid.play()
+    main_grid.broadcast_order(order)
 
+    play_grid_thread = threading.Thread(target=play_and_show_grid)
+    play_grid_thread.start()
 
-
-    # my_print(logic_grid.logic_grid)
     main_grid.grid_ui.mainloop()
+  #  my_print(main_grid.logic_grid)
