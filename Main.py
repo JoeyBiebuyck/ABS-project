@@ -101,7 +101,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
 class Grid(object):  # het logische grid
     def __init__(self, item_to_pos_dict, size, strategy=random_action, laadplatformen=2, nr_of_agents=2, cell_size=30):
-        self.agents = [Agent(self, strategy) for _ in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [Agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid: np.ndarray[np.ndarray[Position]] = np.array([np.array([Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = GridUI(size, cell_size)
@@ -286,7 +286,7 @@ def strategy_1(available, chosen_items, other_agent_choices, current_position, p
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
 class Agent(object):
-    def __init__(self, grid, strategy, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
+    def __init__(self, grid, strategy, name, capacity=2):  # TODO: zorg ervoor dat elke strategie dezelfde parameters neemt (en definieer ze altijd boven alles)
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
         self.other_agents: list[Agent] = [] #lijst van pointers naar de andere agenten
@@ -304,12 +304,8 @@ class Agent(object):
         self.original_orders = {}  # dict van order number -> originele order
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.the_test_order = []
+        self.name = name
 
-
-    #TODO: pad maken om heen te gaan naar een item en dan nieuw pad om terug te gaan naar laadplatform?
-    #TODO: beurt of geen beurt om een item te pakken? -> momenteel wel beurt!
-    #TODO: Beschouw pad als heen en terug ? -> momenteel wel!
-    #TODO: elke beurt pad berekenen? -> momenteel niet
     def play(self): #kies actie
         if len(self.the_test_order ) == 0:
             print("succes! all orders fullfilled")
@@ -370,7 +366,7 @@ class Agent(object):
         #checkt of je ergens effectief naar toe kan en beweegt en past zich aan
         #returns de beste next position
         #new_row, new_col = position
-        print("selecting move!!!")
+        print("selecting move for agent ", self.name)
         pos_chosen_items = []
         distance_to_available_items = []
         if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
@@ -384,9 +380,8 @@ class Agent(object):
                 self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
 
         # start and goal position for a star
-
         start = self.current_position
-        print("selected item: ", self.selected_item)
+        print("selected item: ", self.selected_item.name)
         goal = self.grid.items_to_pos_dict.get(self.selected_item)
         path = astar(self.grid.logic_grid, start, goal)
         if self.current_position == self.starting_position:
@@ -395,7 +390,7 @@ class Agent(object):
         first_position = path[0]
         print("current position is", self.current_position)
         print("first position: ", first_position)
-        print("path is: ", path)
+        print("path is: ", path, "\n")
         new_row, new_col = first_position
 
 
@@ -434,7 +429,6 @@ class Agent(object):
     def next_order(self):
         if self.highest_order > self.current_order:
             self.current_order += 1
-
 
 
 class Product(object):
