@@ -247,8 +247,8 @@ def manhattandistance(a, b): # berekent manhattan distance
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
 
-def neighbours(loc):  # nodig voor A-star, basically successor
-    return [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
+def neighbours(loc, grid):  # nodig voor A-star, basically successor
+    return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None, filter(lambda coordinate: not out_of_bounds(coordinate, grid.size), [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]))
 
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal
@@ -262,12 +262,14 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal
                 visited.append(current_pos)
                 if current_pos == goal:
                     return path
-                for neighbour in neighbours(current_pos):
+                for neighbour in neighbours(current_pos, grid):
                     cost = cost + 1
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)
                     total_cost = cost + heuristic
                     agenda.insert(total_cost, (neighbour, new_path, cost))
+
+
 
 
 def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de richting waar de agent in gaat
@@ -330,10 +332,11 @@ class Agent(object):
         print("current order: ", self.current_order)
         print("available items: ", self.available)
         print("developing items: ", self.developing_orders[self.current_order])
-        if len(self.available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
-            print(self.name, " cannot do anything else, he is waiting for the other agent to finish collecting items")
-        elif len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
+        if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
             print("succes! all orders fulfilled")
+            self.grid.stop()
+        elif len(self.available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
+            print(self.name, " cannot do anything else, he is waiting for the other agent to finish collecting items")
         elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(self.available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
             self.next_order()
         elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
@@ -393,25 +396,23 @@ class Agent(object):
             agent.other_agents_choices.append(item)
 
     def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.
+        curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
         if adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
             # als er geen agent is gaan we gwn naar de volgende positie
             if not out_of_bounds(next_pos, self.grid.size):
-                curr_pos_row, curr_pos_col = self.current_position
                 self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
                 self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
                 self.current_position = next_pos
-                # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
             else:
                 print("!!!!!error next_post out of bounds!!!!!")
         elif adjacent(self.current_position, next_pos):
             # als er een agent is wijken we uit naar rechts.
             alternative_position = move_right(self.current_position, next_pos, self.grid.size)
-            curr_row, curr_col = alternative_position
-            self.grid.logic_grid[curr_row][curr_col].agent = None
-            self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
+            alt_next_pos_row, alt_next_pos_col = alternative_position
+            self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
+            self.grid.logic_grid[alt_next_pos_row][alt_next_pos_col].agent = self
             self.current_position = alternative_position
-            # self.grid.grid_ui.update_ui(self.grid.logic_grid)  # updating method!!!
         else:
             print("!!!error not adjacent!!!")
 
@@ -435,7 +436,7 @@ class Agent(object):
         # start and goal position for a star
         start = self.current_position
         goal = self.grid.items_to_pos_dict.get(self.selected_item)
-        path = astar(self.grid.logic_grid, start, goal)
+        path = astar(self.grid, start, goal)
         # volgende positie die we willen bereiken.
         next_pos = path[0]
         print("current position is", self.current_position)
@@ -447,7 +448,7 @@ class Agent(object):
     def return_home(self): #TODO:Moet move right nog gebruiken.
         print(self.name, " is returning home!!!")
         #path en next_positon bepalen
-        return_path = astar(self.grid.logic_grid, self.current_position, self.starting_position)
+        return_path = astar(self.grid, self.current_position, self.starting_position)
         print("returnpath is: ", return_path, "\n")
         # volgende positie die we willen bereiken.
         next_pos = return_path[0]
