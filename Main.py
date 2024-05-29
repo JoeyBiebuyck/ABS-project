@@ -374,7 +374,6 @@ class Agent(object):
         if adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
             # als er geen agent is gaan we gwn naar de volgende positie
             if not out_of_bounds(next_pos, self.grid.size):
-
                 self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
                 self.grid.logic_grid[next_pos_row][next_pos_col].agent = self
                 self.current_position = next_pos
