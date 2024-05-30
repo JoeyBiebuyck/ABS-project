@@ -45,12 +45,9 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal TODO: fix tha
     while True:
         if not agenda.empty():
             current_pos, path, cost = agenda.serve()
-            print("start and finish: ", start, goal)
-            print("current path: ", path)
             if not current_pos in visited:
                 visited.append(current_pos)
                 if current_pos == goal:
-                    print("THE PATH WE FOUND IS: ", path)
                     if len(path) == 0:  # als er het pad 1 lang is, en er staat een agent op de goal, geef de huidige positie terug (de start positie) zodat de agent niet beweegt
                         return [start]
                     else:
@@ -134,5 +131,10 @@ def valid_moves(agent, grid):  # generate alle valid moves voor een agent
         position[col]].agent is None and not out_of_bounds(position, grid.size),
                   adjacent_positions(agent.current_position))
 
-def euclidean_distance(self, position1, position2):
+def euclidean_distance(position1, position2):
     return math.sqrt((position1[0] - position2[0])**2 + (position1[1] - position2[1])**2)
+def distance_to_item_score(distance):
+    if distance == 0:
+        return 100
+    else:
+        return max (0, 50 - distance)

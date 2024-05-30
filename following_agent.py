@@ -12,6 +12,7 @@ class small_brain_agent(object):
         self.grid: logic_grid.Grid = grid  # logic grid
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.name = "Agent " + str(name)
+        self.appointed_items: list[grid_classes.Product] = []
 
     def move(self, next_pos):
         curr_pos_row, curr_pos_col = self.current_position
