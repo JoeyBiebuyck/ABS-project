@@ -28,10 +28,15 @@ def random_action(list_of_items):
 def manhattandistance(a, b): # berekent manhattan distance
     return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
-def neighbours(loc, grid):  # nodig voor A-star, basically successor
- #   return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None, filter(lambda coordinate: not out_of_bounds(coordinate, grid.size), [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]))
-     return filter(lambda coordinate: not out_of_bounds(coordinate, grid.size),
-                      [(loc[0] - 1, loc[1]), (loc[0] + 1, loc[1]), (loc[0], loc[1] + 1), (loc[0], loc[1] - 1)])
+def is_loading_dock(self, position, agent):  # de positie een loading dock van een agent is
+    row, col = position
+    loading_dock = self.logic_grid[row][col].loading_dock
+    if loading_dock is not None:
+        owner_of_dock = loading_dock.agent
+        if owner_of_dock is not None:
+            return loading_dock.agent == agent
+def neighbours(loc, grid, goal):  # nodig voor A-star, basically successor
+   return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None or coordinate == goal, filter(lambda coordinate: not out_of_bounds(coordinate, grid.size), [(loc[0]-1, loc[1]), (loc[0]+1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]))
 
 def astar(grid, start, goal): # maakt een pad tussen start en goal TODO: fix that shit
     agenda = PriorityQueue()
@@ -50,7 +55,7 @@ def astar(grid, start, goal): # maakt een pad tussen start en goal TODO: fix tha
                         return [start]
                     else:
                         return path
-                for neighbour in neighbours(current_pos, grid):
+                for neighbour in neighbours(current_pos, grid, goal):
                     cost = cost + 1
                     new_path = path + [neighbour]
                     heuristic = math.dist(neighbour, goal)

@@ -56,7 +56,6 @@ class Grid(object):  # het logische grid
             self.logic_grid[row][col].agent = agent
             print(f"Added agent at position ({row}, {col}) with loading dock")
 
-   #     self.grid_ui.update_ui(self.logic_grid)  # updating method!!!
 
     def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen) TODO: moet aan de nieuwe uitbreidingen aangepast worden
         starting_positions = []
