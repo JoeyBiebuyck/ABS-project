@@ -17,7 +17,7 @@ class centralised_agent(object):
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
-        self.name = "Central agent " + name
+        self.name = "Agent " + name
 
     def play(self):
         pass

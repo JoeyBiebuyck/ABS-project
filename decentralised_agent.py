@@ -19,7 +19,7 @@ class Decentralised_agent(object):
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
-        self.name = "Decentralised agent " + str(name)
+        self.name = "Agent " + str(name)
 
     def play(self):  # kies actie
         available = self.available_items[self.current_order]
