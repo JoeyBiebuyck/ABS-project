@@ -22,24 +22,26 @@ class Agent(object):
         self.name = "Agent " + str(name)
 
     def play(self):  # kies actie
+        print("Het is de beurt van: ", self.name)
         print("current order: ", self.current_order)
-        print("available items: ", self.available)
-        print("developing items: ", self.developing_orders[self.current_order])
+        print("available items: ", list(map(lambda product: product.name, self.available)))
+        print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
             print("succes! all orders fulfilled")
             self.grid.stop()
         elif len(self.available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
-            print(self.name, " cannot do anything else, he is waiting for the other agent to finish collecting items")
+            print("cannot do anything else, he is waiting for the other agent to finish collecting items")
+        elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(
+            self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+            self.choose_item()
         elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(self.available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
             self.next_order()
-        elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
-            self.choose_item()
         elif self.grid.has_item(self.current_position, self.chosen_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0:  # als je op je loading dock bent, deposit je items
             self.deposit()
         elif len(self.chosen_items) == 0:  # als je alle items hebt keer terug naar huis
-            print(self.name, " has retrieved all orders")
+            print(self.name, "has retrieved all orders")
             self.move(self.return_home())
         else:
             self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
@@ -50,15 +52,15 @@ class Agent(object):
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
+        print("picking up :", item.name, "\n")
 
     def deposit(self):  # geeft item af aan een loading dock
-        print(self.name, " depositing")
-        print("current order: ", self.current_order, "\n")
         row, col = self.current_position
         item = self.storage.pop()
+        print("depositing", item.name)
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
-        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[self.current_order]))
+        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[self.current_order]), "\n")
         self.developing_orders[self.current_order].remove(item)
 
         for agent in self.other_agents:
@@ -101,7 +103,7 @@ class Agent(object):
     def select_next_product_and_position(self): #TODO is het altijd het beste om eerst naar het dichste product te gaan?
         #construeert pad en geeft de beste next position weer
         #returns de beste next position en roept de move methode op.
-        print("agent ", self.name, " is selecting next move!!!")
+        print("selecting move")
         pos_chosen_items = []
         distance_to_available_items = []
         if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
@@ -132,10 +134,10 @@ class Agent(object):
         print("current returning position is: ", self.current_position)
         return_path = util.astar(self.grid, self.current_position, self.starting_position)
         next_pos = return_path[0]
-        print("going to: ", next_pos)
+        print("going to: ", next_pos, "\n")
         return next_pos
 
     def next_order(self):
-        print(self.name, " going to the next order")
+        print(self.name, "is going to the next order", "\n")
         self.current_order += 1
         self.available = self.developing_orders[self.current_order].copy()
