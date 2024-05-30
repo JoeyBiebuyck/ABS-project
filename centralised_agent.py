@@ -57,6 +57,6 @@ class centralised_agent(object):
         score_move = 0
         x,y = agent.current_position
         new_position_agent = move
-        nearest_item, distance_to_item = util.distance_to_item(new_position_agent, agent.chosen_items)
+        nearest_item, distance_to_item = self.distance_to_item(new_position_agent, agent.chosen_items)
         score_move += util.distance_to_item_score(distance_to_item)
         return score_move
