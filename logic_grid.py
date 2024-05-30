@@ -49,12 +49,14 @@ class Grid(object):  # het logische grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
             row, col = value
             self.logic_grid[row][col].item = key
-            print(f"Added item '{key}' at position ({row}, {col})")
+            print(f"Added item '{key.name}' at position ({row}, {col})")
+        print("")
         for agent in self.agents:  # populate de laadplekken en agenten
             row, col = agent.starting_position
             self.logic_grid[row][col].loading_dock = grid_classes.Loading_Dock(agent, agent.starting_position)
             self.logic_grid[row][col].agent = agent
-            print(f"Added agent at position ({row}, {col}) with loading dock")
+            print(f"Added {agent.name} at position ({row}, {col}) with loading dock")
+        print("")
 
 
     def replace_agents(self, new_agents, old_agents):  # functie die kapotte agents verwijdert en toevoegt (agent weg en toe voegen) TODO: moet aan de nieuwe uitbreidingen aangepast worden

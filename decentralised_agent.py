@@ -29,10 +29,10 @@ class Agent(object):
         print("available items: ", list(map(lambda product: product.name, self.available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
-            print("succes! all orders fulfilled")
+            print("succes! all orders fulfilled\n")
             self.grid.stop()
         elif len(self.available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
-            print("cannot do anything else, he is waiting for the other agent to finish collecting items")
+            print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
         elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(
             self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
             self.choose_item()
@@ -43,7 +43,7 @@ class Agent(object):
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0:  # als je op je loading dock bent, deposit je items
             self.deposit()
         elif len(self.chosen_items) == 0:  # als je alle items hebt keer terug naar huis
-            print(self.name, "has retrieved all orders")
+            print(self.name, "has retrieved all reserved items\n")
             self.move(self.return_home())
         else:
             self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
@@ -77,6 +77,7 @@ class Agent(object):
         self.available.remove(item)
         self.available_items[self.current_order].remove(item)
         self.chosen_items.append(item)
+        print(item.name, "was chosen\n")
         for agent in self.other_agents:
             agent.agent_choices[self.current_order].append(item)  # zeg tegen andere agenten welk item je hebt gekozen
             agent.available_items[self.current_order].remove(item)
