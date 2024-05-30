@@ -2,11 +2,11 @@ import math
 import util
 import grid_classes
 import logic_grid
-class Agent(object):
+class Decentralised_agent(object):
     def __init__(self, grid, strategy, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)  # filler positie
-        self.other_agents: list[Agent] = []  # lijst van pointers naar de andere agenten
+        self.other_agents: list[Decentralised_agent] = []  # lijst van pointers naar de andere agenten
         self.capacity = capacity  # storage van een agent
         self.storage = []  # wat zit er al in de storage
         self.strategy = strategy  # welke strategie op dit moment strat 1 is selected

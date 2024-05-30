@@ -1,6 +1,5 @@
 import numpy as np
 import time
-
 import following_agent
 import util
 import grid_classes
@@ -43,7 +42,7 @@ class Grid(object):
 class Decentralised_grid(Grid):  # het logische grid
     def __init__(self, item_to_pos_dict, size, strategy=util.random_action, nr_of_agents=2, cell_size=30):
         super().__init__(item_to_pos_dict, size, cell_size=cell_size)
-        self.agents = [decentralised_agent.Agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
+        self.agents = [decentralised_agent.Decentralised_agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.init_agents()
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten

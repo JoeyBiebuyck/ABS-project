@@ -7,12 +7,12 @@ class Product(object):
 
 class Loading_Dock(object):
     def __init__(self, agent, position):
-        self.agent: decentralised_agent.Agent = agent
+        self.agent: decentralised_agent.Decentralised_agent = agent
         self.position: (int, int) = position
         self.contents: list[Product] = []
 
 class Position(object):
     def __init__(self):
-        self.agent: decentralised_agent.Agent | None = None
+        self.agent: decentralised_agent.Decentralised_agent | None = None
         self.loading_dock: Loading_Dock | None = None
         self.item: Product | None = None
