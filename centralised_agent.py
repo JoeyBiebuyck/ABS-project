@@ -9,7 +9,13 @@ class bigDogAgent(object):
     def __init__(self, grid, choosing_strategy, move_strategy):
         self.agents: list[following_agent.small_brain_agent] = []
         self.order: list[grid_classes.Product] = []
+        self.current_order: list[grid_classes.product] = []
+        self.nr_of_orders = []
+        self.highest_order = 0
+        self.original_orders = {}  # dict van order number -> originele order
+        self.developing_orders = {} # dict van order number → items van de order dat nog niet gedeposit zijn
         self.available: list[grid_classes.Product] = [] # initieel gelijk aan de order
+        self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.choosing_strategy = choosing_strategy
         self.move_strategy = move_strategy
         self.grid = grid
@@ -52,6 +58,6 @@ class bigDogAgent(object):
         score_move = 0
         x,y = agent.current_position
         new_position_agent = move
-        nearest_item, distance_to_item = util.distance_to_item(new_position_agent, agent.chosen_items)
+        nearest_item, distance_to_item = self.distance_to_item(new_position_agent, agent.chosen_items)
         score_move += util.distance_to_item_score(distance_to_item)
         return score_move
