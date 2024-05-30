@@ -19,8 +19,38 @@ class centralised_agent(object):
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.name = "Agent " + str(name)
 
-    def play(self):
-        pass
+    def play(self):  # kies actie
+        for agent in self.working_agents:
+            available = self.available_items[self.current_order]
+            print("Het is de beurt van: ", agent.name)
+            print("current order: ", self.current_order)
+            print("available items: ", list(map(lambda product: product.name, available)))
+            print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
+            if len(self.developing_orders[
+                       self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
+                print("succes! all orders fulfilled\n")
+                self.grid.stop()
+            elif len(available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(
+                    self.storage) == 0:
+                print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
+            elif self.capacity > len(self.chosen_items) and len(available) != 0 and len(
+                    self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+                self.choose_item()
+            elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(
+                    available) == 0 and len(
+                    self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+                self.next_order()
+            elif self.grid.has_item(self.current_position,
+                                    self.chosen_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+                self.pick_up()
+            elif self.grid.is_loading_dock(self.current_position, self) and len(
+                    self.storage) != 0:  # als je op je loading dock bent, deposit je items
+                self.deposit()
+            elif len(self.chosen_items) == 0:  # als je alle items hebt keer terug naar huis
+                print(self.name, "has retrieved all reserved items\n")
+                self.move(self.return_home())
+            else:
+                self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
 
     def assign_items(self, available_items, agents): # geeft alle agenten de items dat ze gaan moeten halen TODO: zet de agents_with_space als invoer idp van alle agents, zo kan je de conditional tak vermijden als je er geen hebt
         agents_with_space = filter(lambda agent: agent.appointed_items < agent.capacity, agents)
