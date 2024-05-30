@@ -53,15 +53,15 @@ class GridUI(tk.Tk):  # voor de visualisatie
         # Redraw grid
         self.draw_grid()
         dir = "pictures/"
-        extension = ".png"
+        ext = ".png"
 
         for i in range(self.size):
             for j in range(self.size):
                 pos = logic_grid[i][j]
                 if pos.agent:
-                    self.add_image_to_grid(i, j, "pictures/agent.png")
+                    self.add_image_to_grid(i, j, dir+pos.agent.name+ext)
                 elif pos.item:
-                    self.add_image_to_grid(i, j, dir+pos.item.name+extension) #item.png
+                    self.add_image_to_grid(i, j, dir+pos.item.name+ext) #item.png
                 elif pos.loading_dock:
                     self.add_image_to_grid(i, j, "pictures/loading_dock.png")
                 else:
