@@ -139,10 +139,10 @@ class Decentralised_grid(Grid):  # het logische grid
 
 
 class Centralised_grid(Grid):
-    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30): #TODO: move strategy
+    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1): #TODO: move strategy
         super().__init__(item_to_pos_dict, size, cell_size=cell_size)
         self.working_agents = [following_agent.following_agent(self, agent_nr, capacity=agent_capacity) for agent_nr in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
-        self.central_agent = centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy)
+        self.central_agents = [centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]
         self.init_agents()
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
@@ -167,19 +167,18 @@ class Centralised_grid(Grid):
 
     def broadcast_order(self, order):  # laat aan elke agent weten wat de order is
         self.nr_of_orders += 1
-        central_agent = self.central_agent
-
-        if self.nr_of_orders == 1:
-            central_agent.current_order = 1
-
-        central_agent.highest_order = 1
-        central_agent.original_orders[central_agent.highest_order] = order.copy()
-        central_agent.developing_orders[central_agent.highest_order] = order.copy()
-        central_agent.agent_choices[central_agent.highest_order] = []
-        central_agent.available_items[central_agent.highest_order] = order.copy()
+        for central_agent in self.central_agents:
+            if self.nr_of_orders == 1:
+                central_agent.current_order = 1
+            central_agent.highest_order = 1
+            central_agent.original_orders[central_agent.highest_order] = order.copy()
+            central_agent.developing_orders[central_agent.highest_order] = order.copy()
+            central_agent.agent_choices[central_agent.highest_order] = []
+            central_agent.available_items[central_agent.highest_order] = order.copy()
 
     def play(self):
         while self.running:
-            self.central_agent.play()
-            self.grid_ui.update_ui(self.logic_grid)
-            time.sleep(0.1)
+            for central_agent in self.central_agents:
+                central_agent.play()
+                self.grid_ui.update_ui(self.logic_grid)
+                time.sleep(0.1)

@@ -6,7 +6,7 @@ import math
 import util
 import following_agent
 class centralised_agent(object):
-    def __init__(self, grid, following_agents, choosing_strategy, move_strategy):
+    def __init__(self, grid, following_agents, choosing_strategy, move_strategy, name):
         self.agents: list[following_agent.following_agent] = following_agents
         self.choosing_strategy = choosing_strategy
         self.move_strategy = move_strategy
@@ -17,6 +17,7 @@ class centralised_agent(object):
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
+        self.name = "Central agent " + name
 
     def play(self):
         pass
@@ -33,7 +34,6 @@ class centralised_agent(object):
         agents_with_items = filter(lambda agent: len(agent.appointed_items) != 0, agents)
         for agent in agents_with_items:
             agent.move(self.calculate_best_move(agent))
-
 
     #valid moves zit in util.py
     #euclidian distance ook
