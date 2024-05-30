@@ -19,6 +19,8 @@ class Agent(object):
         self.current_order = 0
         self.original_orders = {}  # dict van order number -> originele order
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
+        self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
+       # self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.name = "Agent " + str(name)
 
     def play(self):  # kies actie
@@ -52,6 +54,10 @@ class Agent(object):
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
+        for agent in self.other_agents:
+            agent.agent_choices[self.current_order].remove(item)
+            if agent.current_order == self.current_order:
+                agent.other_agents_choices.remove(item)
         print("picking up :", item.name, "\n")
 
     def deposit(self):  # geeft item af aan een loading dock
@@ -60,24 +66,20 @@ class Agent(object):
         print("depositing", item.name)
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
-        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[self.current_order]), "\n")
         self.developing_orders[self.current_order].remove(item)
-
+        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[self.current_order]), "\n")
         for agent in self.other_agents:
             agent.developing_orders[self.current_order].remove(item)
-
-        # if len(curr_to_deposit) == 0: # laat iedereen naar het volgende order gaan als de andere compleet is TODO: laten we ze misschien al items van andere bestellingen verzamelen?
-        #     self.next_order()
-        #     # for agent in self.other_agents: #kan misschien zonder deze, anders moet het met, alleen als we errors krijgen tho
-        #     #     agent.next_order()
 
     def choose_item(self):  # kiest een item a.d.h.v de strategie.
         item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available.remove(item)
         self.chosen_items.append(item)
         for agent in self.other_agents:
-            agent.available.remove(item)
-            agent.other_agents_choices.append(item)
+            agent.agent_choices[self.current_order].append(item)  # zeg tegen andere agenten welk item je hebt gekozen
+            if agent.current_order == self.current_order:
+                agent.available.remove(item)
+                agent.other_agents_choices.append(item)
 
     def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.#TODO is move right nog nodig als astar deftig werkt?
         curr_pos_row, curr_pos_col = self.current_position
@@ -138,6 +140,10 @@ class Agent(object):
         return next_pos
 
     def next_order(self):
-        print(self.name, "is going to the next order", "\n")
+        print(self.name, "is going to the next order")
         self.current_order += 1
-        self.available = self.developing_orders[self.current_order].copy()
+        self.other_agents_choices = self.agent_choices[self.current_order].copy()
+        self.available = list(filter(lambda item: item not in self.other_agents_choices, self.developing_orders[self.current_order].copy()))
+
+        print("available items are:", list(map(lambda item: item.name, self.available)))
+        print("other agent choices are:", list(map(lambda item: item.name, self.other_agents_choices)), "\n")

@@ -16,7 +16,7 @@ def strategy_1(available, chosen_items, other_agent_choices, current_position, p
     else:
         for i in location_available_items:
             #print("this is the location of an available item: ", i)
-            #print("this is the other agent choice: ", other_agent_choices[-1])
+            #print("this is the other agent choice: ", agent_choices[-1])
             distance_to_available_items.append(math.dist(i, product_locations_dictonairy.get(other_agent_choices[-1])))
         return available[(distance_to_available_items.index(max(distance_to_available_items)))]
 
