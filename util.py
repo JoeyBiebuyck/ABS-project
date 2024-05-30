@@ -121,7 +121,7 @@ def build_dictionary(lijst_van_producten, grid_size): # bouwt item to position d
                 break
     return dict
 
-def adjacent_positions(position):
+def adjacent_positions(position): #bepaald  de aangrenzende posities
     row, col = position
     return [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]
 def valid_moves(agent, grid):  # generate alle valid moves voor een agent
@@ -131,10 +131,9 @@ def valid_moves(agent, grid):  # generate alle valid moves voor een agent
         position[col]].agent is None and not out_of_bounds(position, grid.size),
                   adjacent_positions(agent.current_position))
 
-def euclidean_distance(position1, position2):
-    return math.sqrt((position1[0] - position2[0])**2 + (position1[1] - position2[1])**2)
 def distance_to_item_score(distance):
     if distance == 0:
         return 100
     else:
         return max (0, 50 - distance)
+

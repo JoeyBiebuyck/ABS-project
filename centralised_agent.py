@@ -43,8 +43,8 @@ class bigDogAgent(object):
                 best_move = move
         return best_move
 
-    def distance_to_item(self, position, list_of_items):
-        list_of_positions = zip(list_of_items, map(lambda item_pos: util.euclidean_distance(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))
+    def distance_to_item(self,position, list_of_items):
+        list_of_positions = zip(list_of_items, map(lambda item_pos: math.dist(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))
         nearest_item, distance_to_item = min(list_of_positions, key=lambda tuple: tuple[1])
         return nearest_item, distance_to_item
 
@@ -52,6 +52,6 @@ class bigDogAgent(object):
         score_move = 0
         x,y = agent.current_position
         new_position_agent = move
-        nearest_item, distance_to_item = self.distance_to_item(new_position_agent, agent.chosen_items)
+        nearest_item, distance_to_item = util.distance_to_item(new_position_agent, agent.chosen_items)
         score_move += util.distance_to_item_score(distance_to_item)
         return score_move
