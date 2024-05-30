@@ -113,11 +113,13 @@ class Grid(object):  # het logische grid
                 agent.original_orders[agent.highest_order] = order.copy()
                 agent.developing_orders[agent.highest_order] = order.copy()
                 agent.agent_choices[agent.highest_order] = []
+                agent.available_items[agent.highest_order] = order.copy()
             else:
                 agent.highest_order += 1
                 agent.original_orders[agent.highest_order] = order.copy()
                 agent.developing_orders[agent.highest_order] = order.copy()
                 agent.agent_choices[agent.highest_order] = []
+                agent.available_items[agent.highest_order] = order.copy()
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self):  # roept play op bij elke agent

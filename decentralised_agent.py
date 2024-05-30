@@ -20,7 +20,7 @@ class Agent(object):
         self.original_orders = {}  # dict van order number -> originele order
         self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
         self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
-       # self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
+        self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.name = "Agent " + str(name)
 
     def play(self):  # kies actie
@@ -51,14 +51,15 @@ class Agent(object):
     def pick_up(self): #raapt een item op #TODO remove from grid?
         row, col = self.current_position
         item: grid_classes.Product = self.grid.logic_grid[row][col].item
+        print("picking up :", item.name, "\n")
         self.chosen_items.remove(item)
         self.storage.append(item)
         self.selected_item = False
         for agent in self.other_agents:
-            agent.agent_choices[self.current_order].remove(item)
             if agent.current_order == self.current_order:
                 agent.other_agents_choices.remove(item)
-        print("picking up :", item.name, "\n")
+            else:
+                agent.agent_choices[self.current_order].remove(item)
 
     def deposit(self):  # geeft item af aan een loading dock
         row, col = self.current_position
@@ -74,9 +75,11 @@ class Agent(object):
     def choose_item(self):  # kiest een item a.d.h.v de strategie.
         item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available.remove(item)
+        self.available_items[self.current_order].remove(item)
         self.chosen_items.append(item)
         for agent in self.other_agents:
             agent.agent_choices[self.current_order].append(item)  # zeg tegen andere agenten welk item je hebt gekozen
+            agent.available_items[self.current_order].remove(item)
             if agent.current_order == self.current_order:
                 agent.available.remove(item)
                 agent.other_agents_choices.append(item)
@@ -143,7 +146,7 @@ class Agent(object):
         print(self.name, "is going to the next order")
         self.current_order += 1
         self.other_agents_choices = self.agent_choices[self.current_order].copy()
-        self.available = list(filter(lambda item: item not in self.other_agents_choices, self.developing_orders[self.current_order].copy()))
+        self.available = self.available_items[self.current_order].copy()
 
         print("available items are:", list(map(lambda item: item.name, self.available)))
         print("other agent choices are:", list(map(lambda item: item.name, self.other_agents_choices)), "\n")
