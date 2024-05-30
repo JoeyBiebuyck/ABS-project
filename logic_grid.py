@@ -100,11 +100,7 @@ class Grid(object): # het logische grid
 
     # fase waar agenten kiezen voor welke items ze moeten gaan.
     def play(self):  # roept play op bij elke agent
-        while self.running:
-            for agent in self.agents:
-                agent.play()
-            self.grid_ui.update_ui(self.logic_grid)
-            time.sleep(0.1)
+        self.boss.play()
 
     def stop(self):
         self.running = False
