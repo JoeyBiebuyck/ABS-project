@@ -52,7 +52,8 @@ class GridUI(tk.Tk):  # voor de visualisatie
 
         # Redraw grid
         self.draw_grid()
-        images = ["pictures/apple.png", "pictures/peach.png", "pictures/banana.png", "pictures/strawberry.png", "pictures/watermelon.png", "pictures/orange.png"]
+        dir = "pictures/"
+        extension = ".png"
 
         for i in range(self.size):
             for j in range(self.size):
@@ -60,9 +61,7 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 if pos.agent:
                     self.add_image_to_grid(i, j, "pictures/agent.png")
                 elif pos.item:
-                    image = random.choice(images)
-                    images.remove(image)
-                    self.add_image_to_grid(i, j, image) #item.png
+                    self.add_image_to_grid(i, j, dir+pos.item.name+extension) #item.png
                 elif pos.loading_dock:
                     self.add_image_to_grid(i, j, "pictures/loading_dock.png")
                 else:
