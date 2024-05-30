@@ -28,6 +28,7 @@ class following_agent(object):
         row, col = self.current_position
         item = self.grid.logic_grid[row][col].item
         self.storage.append(item)
+        self.appointed_items.remove(item)
 
     def deposit(self):
         print(self.name, " depositing")

@@ -20,7 +20,7 @@ if __name__ == "__main__":
     item_dict = util.build_dictionary(producten_lijst, grid_size)
     order = util.generate_order(producten_lijst, unique=True)
     order2 = util.generate_order(producten_lijst, unique=True)
-    main_grid = logic_grid.Grid(item_dict, grid_size, strategy=strategies.strategy_1, nr_of_agents=2)
+    main_grid = logic_grid.Centralised_grid(item_dict, grid_size, choose_strategy=strategies.strategy_1, move_strategy= util.astar,nr_of_agents=2)
     main_grid.init_agents()
     main_grid.populate_grid()
     main_grid.broadcast_order(order)

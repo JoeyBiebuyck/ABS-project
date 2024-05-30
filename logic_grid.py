@@ -152,6 +152,8 @@ class Centralised_grid(Grid):
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
+
+
     def populate_grid(self):  # vul de grid met alle agenten, items en loading docks in logic grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
             row, col = value
