@@ -5,23 +5,28 @@ import grid_classes
 import math
 import util
 import following_agent
-class bigDogAgent(object):
-    def __init__(self, grid, choosing_strategy, move_strategy):
-        self.agents: list[following_agent.small_brain_agent] = []
-        self.order: list[grid_classes.Product] = []
-        self.available: list[grid_classes.Product] = [] # initieel gelijk aan de order
+class centralised_agent(object):
+    def __init__(self, grid, following_agents, choosing_strategy, move_strategy):
+        self.agents: list[following_agent.following_agent] = following_agents
         self.choosing_strategy = choosing_strategy
         self.move_strategy = move_strategy
         self.grid = grid
+        self.current_order = 0
+        self.highest_order = 0
+        self.original_orders = {}  # dict van order number -> originele order
+        self.developing_orders = {}  # dict van order number → items van de order dat nog niet gedeposit zijn
+        self.agent_choices = {}  # dict van order number -> items dat andere agenten gekozen hebben van die bestelling
+        self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
 
     def play(self):
         pass
     def assign_items(self, available_items, agents): # geeft alle agenten de items dat ze gaan moeten halen TODO: zet de agents_with_space als invoer idp van alle agents, zo kan je de conditional tak vermijden als je er geen hebt
         agents_with_space = filter(lambda agent: agent.appointed_items < agent.capacity, agents)
-        while len(agents_with_space) != 0 or self.available != 0: # voor elke agent dat nog items kan kiezen
+        available = self.available_items[self.current_order]
+        while len(agents_with_space) != 0 or available != 0: # voor elke agent dat nog items kan kiezen
             for agent in agents_with_space:
                 item = self.choosing_strategy(available_items)
-                self.available.remove(item)
+                available.remove(item)
                 agent.appointed_items += item
 
     def assign_move(self, agents): # geeft de beste move aan de agents

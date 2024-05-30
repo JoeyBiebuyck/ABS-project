@@ -3,7 +3,7 @@
 import logic_grid
 import grid_classes
 import util
-class small_brain_agent(object):
+class following_agent(object):
     def __init__(self, grid, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = (-1, -1)

@@ -11,10 +11,8 @@ class Agent(object):
         self.storage = []  # wat zit er al in de storage
         self.strategy = strategy  # welke strategie op dit moment strat 1 is selected
         self.grid: logic_grid.Decentralised_grid = grid  # logic grid
-        self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.chosen_items: list[grid_classes.Product] = []  # items die agent zelf koos
         self.selected_item = False  # item dat de agent momenteel achter gaat
-        self.other_agents_choices: list[grid_classes.Product] = []  # items die andere agents kozen
         self.highest_order = 0
         self.current_order = 0
         self.original_orders = {}  # dict van order number -> originele order
@@ -24,19 +22,20 @@ class Agent(object):
         self.name = "Agent " + str(name)
 
     def play(self):  # kies actie
+        available = self.available_items[self.current_order]
         print("Het is de beurt van: ", self.name)
         print("current order: ", self.current_order)
-        print("available items: ", list(map(lambda product: product.name, self.available)))
+        print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
             print("succes! all orders fulfilled\n")
             self.grid.stop()
-        elif len(self.available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
+        elif len(available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
             print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
-        elif self.capacity > len(self.chosen_items) and len(self.available) != 0 and len(
+        elif self.capacity > len(self.chosen_items) and len(available) != 0 and len(
             self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
             self.choose_item()
-        elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(self.available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+        elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
             self.next_order()
         elif self.grid.has_item(self.current_position, self.chosen_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
@@ -56,10 +55,7 @@ class Agent(object):
         self.storage.append(item)
         self.selected_item = False
         for agent in self.other_agents:
-            if agent.current_order == self.current_order:
-                agent.other_agents_choices.remove(item)
-            else:
-                agent.agent_choices[self.current_order].remove(item)
+            agent.agent_choices[self.current_order].remove(item)
 
     def deposit(self):  # geeft item af aan een loading dock
         row, col = self.current_position
@@ -73,17 +69,15 @@ class Agent(object):
             agent.developing_orders[self.current_order].remove(item)
 
     def choose_item(self):  # kiest een item a.d.h.v de strategie.
-        item = self.strategy(self.available, self.chosen_items, self.other_agents_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
-        self.available.remove(item)
+        available = self.available_items[self.current_order]
+        other_agent_choices = self.agent_choices[self.current_order]
+        item = self.strategy(available, self.chosen_items, other_agent_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available_items[self.current_order].remove(item)
         self.chosen_items.append(item)
         print(item.name, "was chosen\n")
         for agent in self.other_agents:
             agent.agent_choices[self.current_order].append(item)  # zeg tegen andere agenten welk item je hebt gekozen
             agent.available_items[self.current_order].remove(item)
-            if agent.current_order == self.current_order:
-                agent.available.remove(item)
-                agent.other_agents_choices.append(item)
 
     def move(self, next_pos):  # beweegt de agent naar next_pos, wijkt uit voor andere agenten.#TODO is move right nog nodig als astar deftig werkt?
         curr_pos_row, curr_pos_col = self.current_position
@@ -146,8 +140,5 @@ class Agent(object):
     def next_order(self):
         print(self.name, "is going to the next order")
         self.current_order += 1
-        self.other_agents_choices = self.agent_choices[self.current_order].copy()
-        self.available = self.available_items[self.current_order].copy()
-
-        print("available items are:", list(map(lambda item: item.name, self.available)))
-        print("other agent choices are:", list(map(lambda item: item.name, self.other_agents_choices)), "\n")
+        print("available items are:", list(map(lambda item: item.name, self.available_items[self.current_order])))
+        print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[self.current_order])), "\n")
