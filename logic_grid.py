@@ -5,8 +5,10 @@ import grid_classes
 import decentralised_agent
 import visual_grid
 
-class Grid(object):  # het logische grid
-    def __init__(self, item_to_pos_dict, size, strategy=util.random_action, laadplatformen=2, nr_of_agents=2, cell_size=30):
+class Grid(object): pass
+
+class Decentralised_grid(Grid):  # het logische grid
+    def __init__(self, item_to_pos_dict, size, strategy=util.random_action, laadplatformen=2, nr_of_agents=2, cell_size=30, decentralised=True):
         self.agents = [decentralised_agent.Agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid: np.ndarray[np.ndarray[grid_classes.Position]] = np.array([np.array([grid_classes.Position() for _ in range(size)]) for _ in range(size)])

@@ -10,7 +10,7 @@ class Agent(object):
         self.capacity = capacity  # storage van een agent
         self.storage = []  # wat zit er al in de storage
         self.strategy = strategy  # welke strategie op dit moment strat 1 is selected
-        self.grid: logic_grid.Grid = grid  # logic grid
+        self.grid: logic_grid.Decentralised_grid = grid  # logic grid
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.chosen_items: list[grid_classes.Product] = []  # items die agent zelf koos
         self.selected_item = False  # item dat de agent momenteel achter gaat

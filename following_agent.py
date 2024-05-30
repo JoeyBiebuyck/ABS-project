@@ -9,7 +9,7 @@ class small_brain_agent(object):
         self.current_position: (int, int) = (-1, -1)
         self.capacity = capacity
         self.storage = []
-        self.grid: logic_grid.Grid = grid  # logic grid
+        self.grid: logic_grid.Decentralised_grid = grid  # logic grid
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.name = "Agent " + str(name)
         self.appointed_items: list[grid_classes.Product] = []
