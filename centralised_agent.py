@@ -26,75 +26,82 @@ class centralised_agent(object):
             print("current order: ", self.current_order)
             print("available items: ", list(map(lambda product: product.name, available)))
             print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
-            if len(self.developing_orders[
-                       self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
+            if len(self.developing_orders[ self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
                 print("succes! all orders fulfilled\n")
                 self.grid.stop()
-            elif len(available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(
-                    self.storage) == 0:
-                print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
-            elif self.capacity > len(self.chosen_items) and len(available) != 0 and len(
-                    self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
-                self.choose_item()
-            elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(
-                    available) == 0 and len(
-                    self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
-                self.next_order()
-            elif self.grid.has_item(self.current_position,
-                                    self.chosen_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
-                self.pick_up()
-            elif self.grid.is_loading_dock(self.current_position, self) and len(
-                    self.storage) != 0:  # als je op je loading dock bent, deposit je items
-                self.deposit()
-            elif len(self.chosen_items) == 0:  # als je alle items hebt keer terug naar huis
-                print(self.name, "has retrieved all reserved items\n")
-                self.move(self.return_home())
-            else:
-                self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
 
-    def assign_items(self, available_items, agents): # geeft alle agenten de items dat ze gaan moeten halen TODO: zet de agents_with_space als invoer idp van alle agents, zo kan je de conditional tak vermijden als je er geen hebt
-        agents_with_space = filter(lambda agent: agent.appointed_items < agent.capacity, agents)
+            elif (len(available) == 0 and self.current_order == self.highest_order and len(agent.appointed_items) == 0
+                  and len(agent.storage) == 0):
+                print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
+
+            elif (agent.capacity > len(agent.appointed_items) and len(available) != 0
+                  and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+                self.appoint_item(agent)
+
+            elif self.highest_order > self.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+                self.next_order()
+
+            elif self.grid.has_item(agent.current_position,
+                                    agent.appointed_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+                self.make_pick_up(agent)
+
+            elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items
+                self.make_deposit(agent)
+
+            elif len(agent.appointed_items) == 0:  # als je alle items hebt keer terug naar huis
+                print(agent.name, "has retrieved all appointed items\n")
+                self.make_move(agent, self.find_way_home(agent))
+
+            else:
+                self.make_move(agent, self.select_next_product_and_position(agent))  # we bepalen naar waar de agent moet bewegen.
+
+    def next_order(self):
+        print("going to the next order")
+        self.current_order += 1
+        print("available items are:", list(map(lambda item: item.name, self.available_items[self.current_order])))
+        print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[self.current_order])),"\n")
+
+    def appoint_item(self, agent):#kiest item a.d.h.v. strategie en geeft het aan de agent
         available = self.available_items[self.current_order]
-        while len(agents_with_space) != 0 or available != 0: # voor elke agent dat nog items kan kiezen
-            for agent in agents_with_space:
-                item = self.choosing_strategy(available_items)
-                available.remove(item)
-                agent.appointed_items += item
-    def make_move(self, agent,next_pos):
-        agent.move(next_pos)
+        other_agent_choices = []
+        for other_agent in filter(lambda agent_in_working_agents: agent_in_working_agents != agent, self.working_agents):
+            other_agent_choices += other_agent.appointed_items
+        item = self.choosing_strategy(available, agent.appointed_items, other_agent_choices, agent.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
+        self.available_items[self.current_order].remove(item)
+        agent.appointed_items.append(item)
+        print(item.name, "was chosen\n")
+
+    def make_move(self, agent, next_pos):
+        next_pos_row, next_pos_col = next_pos
+        if util.adjacent(agent.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
+            # als er geen agent is gaan we gwn naar de volgende positie
+            agent.move(next_pos)
+        elif util.adjacent(agent.current_position, next_pos):
+            # als er een agent is wijken we uit naar rechts.
+            alternative_position = util.move_right(agent.current_position, next_pos, self.grid.size)
+            agent.move(alternative_position)
+        else:
+            print("!!!error not adjacent!!!")
 
     def make_pick_up(self, agent):
-        agent.pickup()
+        agent.pick_up()
+
     def make_deposit(self,agent):
-        agent.pickup()
+        agent.deposit()
 
-    def assign_move(self, agents): # geeft de beste move aan de agents
-        agents_with_items = filter(lambda agent: len(agent.appointed_items) != 0, agents)
-        for agent in agents_with_items:
-            agent.move(self.calculate_best_move(agent))
+    def find_way_home(self,agent):
+        print("returning home!!!")
+        print("current returning position is: ", agent.current_position)
+        return_path = self.move_strategy(self.grid, agent.current_position, agent.starting_position)
+        next_pos = return_path[0]
+        print("going to: ", next_pos, "\n")
+        return next_pos
 
-    #valid moves zit in util.py
-    #euclidian distance ook
-    def calculate_best_move(self, agent): #TODO: Afhankelijk van de afstand naar item, 1kruisende paden, en borders.
-        legal_moves = util.valid_moves(agent,self.grid)
-        best_move = None
-        best_score = 0
-        for move in legal_moves:
-            move_score = self.evaluate_move(agent, move)
-            if move_score > best_score:
-                best_score = move_score
-                best_move = move
-        return best_move
+    def select_next_product_and_position(self, agent):
+        pass
+
 
     def Find_closest_item(self,position, list_of_items): #zoekt het dichtste product en geeft de afstand weer
         list_of_positions = zip(list_of_items, map(lambda item_pos: math.dist(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))
         nearest_item, distance_to_item = min(list_of_positions, key=lambda tuple: tuple[1])
         return nearest_item, distance_to_item
-
-    def evaluate_move (self, agent, move): #TODO: op basis van afstand naar een item
-        score_move = 0
-        x,y = agent.current_position
-        new_position_agent = move
-        nearest_item, distance_to_item = self.distance_to_item(new_position_agent, agent.chosen_items)
-        score_move += util.distance_to_item_score(distance_to_item)
-        return score_move

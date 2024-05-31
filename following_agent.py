@@ -14,6 +14,7 @@ class following_agent(object):
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.name = "Agent " + str(name)
         self.appointed_items: list[grid_classes.Product] = []
+        self.current_order = 0
 
     def move(self, next_pos):
         curr_pos_row, curr_pos_col = self.current_position
