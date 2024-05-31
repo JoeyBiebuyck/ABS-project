@@ -172,7 +172,9 @@ class Centralised_grid(Grid):
         for central_agent in self.central_agents:
             if self.nr_of_orders == 1:
                 central_agent.current_order = 1
-            central_agent.highest_order = 1
+                for agent in central_agent.working_agents:
+                    agent.current_order = 1
+            central_agent.highest_order += 1
             central_agent.original_orders[central_agent.highest_order] = order.copy()
             central_agent.developing_orders[central_agent.highest_order] = order.copy()
             central_agent.agent_choices[central_agent.highest_order] = []

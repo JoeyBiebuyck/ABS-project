@@ -26,9 +26,13 @@ class centralised_agent(object):
             print("current order: ", self.current_order)
             print("available items: ", list(map(lambda product: product.name, available)))
             print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
-            if len(self.developing_orders[ self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
+
+            if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
                 print("succes! all orders fulfilled\n")
                 self.grid.stop()
+
+            elif len(self.developing_orders[self.current_order])==0:
+                self.current_order = self.current_order + 1
 
             elif (len(available) == 0 and self.current_order == self.highest_order and len(agent.appointed_items) == 0
                   and len(agent.storage) == 0):
@@ -38,11 +42,10 @@ class centralised_agent(object):
                   and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
                 self.appoint_item(agent)
 
-            elif self.highest_order > self.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
-                self.next_order()
+            elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+                self.next_order(agent)
 
-            elif self.grid.has_item(agent.current_position,
-                                    agent.appointed_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+            elif self.grid.has_item(agent.current_position,agent.appointed_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
                 self.make_pick_up(agent)
 
             elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items
@@ -55,11 +58,11 @@ class centralised_agent(object):
             else:
                 self.make_move(agent, self.select_next_product_and_position(agent))  # we bepalen naar waar de agent moet bewegen.
 
-    def next_order(self):
+    def next_order(self, agent):
         print("going to the next order")
-        self.current_order += 1
         print("available items are:", list(map(lambda item: item.name, self.available_items[self.current_order])))
         print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[self.current_order])),"\n")
+        agent.current_order += 1
 
     def appoint_item(self, agent):#kiest item a.d.h.v. strategie en geeft het aan de agent
         available = self.available_items[self.current_order]
@@ -87,7 +90,8 @@ class centralised_agent(object):
         agent.pick_up()
 
     def make_deposit(self,agent):
-        agent.deposit()
+        item = agent.deposit()
+        self.developing_orders[agent.current_order].remove(item)
 
     def find_way_home(self,agent):
         print("returning home!!!")
@@ -98,10 +102,30 @@ class centralised_agent(object):
         return next_pos
 
     def select_next_product_and_position(self, agent):
-        pass
+        # construeert pad en geeft de beste next position weer
+        # returns de beste next position en roept de move methode op.
+        print("selecting move")
+        pos_chosen_items = []
+        distance_to_available_items = []
+        if not agent.to_get_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
+            for item in agent.appointed_items:  # gebruiken twee for loops om het dichtste object te kiezen.
+                position_object = self.grid.items_to_pos_dict.get(item)
+                pos_chosen_items.append(position_object)
+            for pos in pos_chosen_items:
+                distance_to_available_items.append(math.dist(agent.current_position, pos))
+            if len(distance_to_available_items) != 0:
+                # selected_item is het item waar we achter gaan
+                agent.to_get_item = agent.appointed_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+        print("selected item: ", agent.to_get_item.name)
 
-
-    def Find_closest_item(self,position, list_of_items): #zoekt het dichtste product en geeft de afstand weer
-        list_of_positions = zip(list_of_items, map(lambda item_pos: math.dist(item_pos, position), map(lambda item: self.grid.items_to_pos_dict[item], list_of_items)))
-        nearest_item, distance_to_item = min(list_of_positions, key=lambda tuple: tuple[1])
-        return nearest_item, distance_to_item
+        # start and goal position for a star
+        start = agent.current_position
+        goal = self.grid.items_to_pos_dict.get(agent.to_get_item)
+        path = self.move_strategy(self.grid, start, goal)
+        # volgende positie die we willen bereiken.
+        next_pos = path[0]
+        print("current position is", agent.current_position)
+        print("next_pos: ", next_pos)
+        print("path is: ", path, "\n")
+        # move methode oproepen om naar de volgende positie te gaan
+        return next_pos

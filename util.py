@@ -81,7 +81,7 @@ def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de r
 def adjacent(pos1, pos2):
     row1, col1 = pos1
     row2, col2 = pos2
-    return abs(row1 - row2) <= 1 ^ abs(col1 - col2) <= 1
+    return (abs(row1 - row2) <= 1 ^ abs(col1 - col2) <= 1) or pos1 == pos2
 
 def out_of_bounds(pos, size):
     row, col = pos

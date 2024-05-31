@@ -15,6 +15,7 @@ class following_agent(object):
         self.name = "Agent " + str(name)
         self.appointed_items: list[grid_classes.Product] = []
         self.current_order = 0
+        self.to_get_item = False
 
     def move(self, next_pos):
         curr_pos_row, curr_pos_col = self.current_position
@@ -30,6 +31,7 @@ class following_agent(object):
         item = self.grid.logic_grid[row][col].item
         self.storage.append(item)
         self.appointed_items.remove(item)
+        self.to_get_item = False
 
     def deposit(self):
         print(self.name, " depositing")
@@ -37,3 +39,4 @@ class following_agent(object):
         item = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
+        return item
