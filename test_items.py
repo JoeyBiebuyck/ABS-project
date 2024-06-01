@@ -15,9 +15,15 @@ def init_orders():
     grid_size = 5
     order_len = 6
 
-
     for _ in range(nr_of_examples):
-        coordinates = [util.generate_random_coordinate(0, grid_size-2, 0, grid_size-1) for _ in range(order_len)]
+        coordinates = []
+        while not len(coordinates) == len(items):
+            new_pos = util.generate_random_coordinate(0, grid_size - 2, 0,
+                                                 grid_size - 1)  # onderste rij is gereserveerd voor load docks
+            if new_pos not in coordinates:
+                coordinates.append(new_pos)
+        # coordinates = [util.generate_random_coordinate(0, grid_size-2, 0, grid_size-1) for _ in range(order_len)]
+
         # order = [(producten_lijst[i], coordinates[i]) for i in range(order_len)]
         order = util.generate_order(producten_lijst, order_len, unique=True)
         item_to_pos_dict = {product: coordinates[i] for i, product in enumerate(producten_lijst)}

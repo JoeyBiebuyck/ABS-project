@@ -1,0 +1,9 @@
+index,row names
+0,Turns choosing
+1,turns moving
+2,turns waiting
+3,number of conflicts
+4,turns picking up
+5,turns depositing
+6,times going to next order
+7,total amount of turns

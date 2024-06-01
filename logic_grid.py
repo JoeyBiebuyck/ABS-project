@@ -8,10 +8,10 @@ import centralised_agent
 import visual_grid
 import pandas as pd
 import os
-from globals import *
+import globals
 
 class Grid(object):
-    def __init__(self, item_to_pos_dict, size, cell_size=30):
+    def __init__(self, item_to_pos_dict, size, cell_size=30, record_stats=False):
         self.items_to_pos_dict = item_to_pos_dict
         self.logic_grid: np.ndarray[np.ndarray[grid_classes.Position]] = np.array([np.array([grid_classes.Position() for _ in range(size)]) for _ in range(size)])
         self.grid_ui = visual_grid.GridUI(size, cell_size)
@@ -20,6 +20,8 @@ class Grid(object):
         self.init_on_curr_pos = False  # deze variabele bepaalt of de nieuwe agenten die oude agenten zouden vervangen beginnen op de startposities, of op de posities waar de oude agenten laatst stonden.
         self.running = True  # als ze niet op de startpositie komen te staan, dan mogen er (in deze versie) niet meer agenten worden toegevoegd dan er worden weggehaald.
         self.nr_of_orders = 0
+        self.record_stats = record_stats
+
 
     def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
@@ -42,8 +44,8 @@ class Grid(object):
 
 
 class Decentralised_grid(Grid):  # het logische grid
-    def __init__(self, item_to_pos_dict, size, strategy=util.random_action, nr_of_agents=2, cell_size=30):
-        super().__init__(item_to_pos_dict, size, cell_size=cell_size)
+    def __init__(self, item_to_pos_dict, size, strategy=util.random_action, nr_of_agents=2, cell_size=30, record_stats=False):
+        super().__init__(item_to_pos_dict, size, cell_size=cell_size, record_stats=record_stats)
         self.agents = [decentralised_agent.Decentralised_agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.init_agents()
         self.populate_grid()
@@ -137,18 +139,18 @@ class Decentralised_grid(Grid):  # het logische grid
         while self.running:
             for agent in self.agents:
                 agent.play()
-            self.grid_ui.update_ui(self.logic_grid)
-            time.sleep(0.1)
+            #self.grid_ui.update_ui(self.logic_grid)  #TODO: uncomment als je wil dat de grid werkt
+            #time.sleep(0.1)
         if not self.running:
             for agent in self.agents:
-                result = pd.read_csv("Decentralised " + agent.name + ".csv")
-                all_features = [agent.nr_of_turns_choosing, agent.nr_of_turns_moving, agent.nr_of_turns_waiting, agent.nr_of_conflicts, agent.nr_of_turns_picking_up, agent.nr_of_turns_depositing, agent.nr_of_next_order, agent.total_nr_of_turns]
-                result[globals.order_name] = all_features
-                globals.order_number += 1
-                os.remove("Decentralised " + agent.name + ".csv")
-                result = result.rename_axis('index')
-                result = result.drop(columns=["index"])
-                result.to_csv("Decentralised " + agent.name + ".csv")
+                if self.record_stats:
+                    result = pd.read_csv("Decentralised " + agent.name + ".csv")
+                    all_features = [agent.nr_of_turns_choosing, agent.nr_of_turns_moving, agent.nr_of_turns_waiting, agent.nr_of_conflicts, agent.nr_of_turns_picking_up, agent.nr_of_turns_depositing, agent.nr_of_next_order, agent.total_nr_of_turns]
+                    result["Order " + str(globals.order_number)] = all_features
+                    os.remove("Decentralised " + agent.name + ".csv")
+                    result = result.rename_axis('index')
+                    result = result.drop(columns=["index"])
+                    result.to_csv("Decentralised " + agent.name + ".csv")
 
                 print(agent.name, "statistics: ")
                 print("succes! all orders fulfilled\n")
@@ -164,8 +166,8 @@ class Decentralised_grid(Grid):  # het logische grid
 
 
 class Centralised_grid(Grid):
-    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1): #TODO: move strategy
-        super().__init__(item_to_pos_dict, size, cell_size=cell_size)
+    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1, record_strats=False): #TODO: move strategy
+        super().__init__(item_to_pos_dict, size, cell_size=cell_size, record_stats=record_strats)
         self.working_agents = [following_agent.following_agent(self, agent_nr, capacity=agent_capacity) for agent_nr in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.central_agents = [centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]
         self.init_agents()
@@ -176,8 +178,6 @@ class Centralised_grid(Grid):
             agent.starting_position = (self.size - 1, current_starting_pos)
             agent.current_position = agent.starting_position
             current_starting_pos += 1
-
-
 
     def populate_grid(self):  # vul de grid met alle agenten, items en loading docks in logic grid
         for key, value in self.items_to_pos_dict.items():  # populate de items
@@ -209,5 +209,5 @@ class Centralised_grid(Grid):
         while self.running:
             for central_agent in self.central_agents:
                 central_agent.play()
-                self.grid_ui.update_ui(self.logic_grid)
-                time.sleep(0.1)
+                #self.grid_ui.update_ui(self.logic_grid)
+                #time.sleep(0.1)

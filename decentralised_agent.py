@@ -45,10 +45,6 @@ class Decentralised_agent(object):
         print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
 
-        print("chosen items: ", list(map(lambda tuple: tuple[0].name, self.chosen_items)))
-        print("item on position: ", self.grid.logic_grid[my_row][my_col].item)
-        print("has item? ", self.grid.has_item(self.current_position, list(map(lambda tuple: tuple[0], self.chosen_items))))
-
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
             print("succes! all orders fulfilled\n")
             self.grid.stop()
