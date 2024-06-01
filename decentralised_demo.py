@@ -28,8 +28,8 @@ if __name__ == "__main__":
     order = util.generate_order(producten_lijst, unique=True)
     order2 = util.generate_order(producten_lijst, unique=True)
     main_grid = logic_grid.Decentralised_grid(item_dict, grid_size, strategy=strategies.strategy_1, nr_of_agents=2)
-    main_grid.init_agents()
-    main_grid.populate_grid()
+ #   main_grid.init_agents()  # als de init_agents() in de __init__ van de klasse maar 1 keer wordt opgeroepen, dan hoeft deze hier niet te staan
+ #   main_grid.populate_grid()
     main_grid.broadcast_order(order)
     main_grid.broadcast_order(order2)
 

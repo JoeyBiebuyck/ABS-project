@@ -44,6 +44,7 @@ class Decentralised_grid(Grid):  # het logische grid
         super().__init__(item_to_pos_dict, size, cell_size=cell_size)
         self.agents = [decentralised_agent.Decentralised_agent(self, strategy, i) for i in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.init_agents()
+        self.populate_grid()
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
@@ -136,6 +137,18 @@ class Decentralised_grid(Grid):  # het logische grid
                 agent.play()
             self.grid_ui.update_ui(self.logic_grid)
             time.sleep(0.1)
+        if not self.running:
+            for agent in self.agents:
+                print(agent.name, "statistics: ")
+                print("succes! all orders fulfilled\n")
+                print("Nr of turns choosing: ", agent.nr_of_turns_choosing)
+                print("Nr of turns moving: ", agent.nr_of_turns_moving)
+                print("Nr of turns waiting: ", agent.nr_of_turns_waiting)
+                print("Nr of conflicts: ", agent.nr_of_conflicts)
+                print("Nr of turn picking up items: ", agent.nr_of_turns_picking_up)
+                print("Nr of turns depositing: ", agent.nr_of_turns_depositing)
+                print("Total nr of moves: ", agent.total_nr_of_moves)
+                print("")
 
 
 class Centralised_grid(Grid):

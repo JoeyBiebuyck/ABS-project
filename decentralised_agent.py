@@ -21,7 +21,17 @@ class Decentralised_agent(object):
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.name = "Agent " + str(name)
 
+        # FOR TESTING:
+        self.nr_of_turns_choosing = 0
+        self.nr_of_turns_moving = 0
+        self.nr_of_conflicts = 0
+        self.nr_of_turns_depositing = 0
+        self.nr_of_turns_picking_up = 0
+        self.nr_of_turns_waiting = 0
+        self.total_nr_of_moves = 0
+
     def play(self):  # kies actie
+        self.total_nr_of_moves += 1
         available = self.available_items[self.current_order]
         print("Het is de beurt van: ", self.name)
         print("my choices: ", list(map(lambda product: product[0].name, self.chosen_items)))
@@ -31,23 +41,28 @@ class Decentralised_agent(object):
         print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
-            print("succes! all orders fulfilled\n")
             self.grid.stop()
+            print("succes! all orders fulfilled\n")
         elif len(available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
+            self.nr_of_turns_waiting += 1
             print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
-        elif self.capacity > len(self.chosen_items) and len(available) != 0 and len(
-            self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+        elif self.capacity > len(self.chosen_items) and len(available) != 0 and len(self.storage) == 0:  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+            self.nr_of_turns_choosing += 1
             self.choose_item()
         elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
             self.next_order()
         elif self.grid.has_item(self.current_position, list(map(lambda tuple: tuple[0], self.chosen_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+            self.nr_of_turns_picking_up += 1
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0:  # als je op je loading dock bent, deposit je items
+            self.nr_of_turns_depositing += 1
             self.deposit()
         elif len(self.chosen_items) == 0:  # als je alle items hebt keer terug naar huis
             print(self.name, "has retrieved all reserved items\n")
+            self.nr_of_turns_moving += 1
             self.move(self.return_home())
         else:
+            self.nr_of_turns_moving += 1
             self.move(self.select_next_product_and_position())  # we bepalen naar waar de agent moet bewegen.
 
     def pick_up(self): #raapt een item op #TODO remove from grid?
@@ -106,6 +121,7 @@ class Decentralised_agent(object):
             self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
             self.grid.logic_grid[alt_next_pos_row][alt_next_pos_col].agent = self
             self.current_position = alternative_position
+            self.nr_of_conflicts += 1
         else:
             print("!!!error not adjacent!!!")
 
