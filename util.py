@@ -164,7 +164,7 @@ def init_stat_files(agents_names_list, decentralised=True):
     if decentralised:
         kind = "Decentralised "
     else:
-        kind = "Centralised "
+        kind = "Centralised worker "
     result = pd.DataFrame()
     result = result.rename_axis('index')
     rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
@@ -179,4 +179,7 @@ def init_stat_files(agents_names_list, decentralised=True):
 
     for name in agents_names_list:
         result.to_csv(kind + name + ".csv")
+
+    if not decentralised:
+        result.to_csv("Centralised decision maker " + "Agent 1" + ".csv")
 

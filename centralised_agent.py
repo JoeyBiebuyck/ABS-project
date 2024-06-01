@@ -16,8 +16,16 @@ class centralised_agent(object):
         self.available_items = {}  # dict van order number -> items dat nog beschikbaar zijn van de bestelling
         self.name = "Agent " + str(name)
 
+        # FOR TESTING:
+        self.nr_of_turns_choosing = 0
+        self.nr_of_conflicts = 0
+        self.nr_of_turns_waiting = 0
+        self.nr_of_next_order = 0
+        self.total_nr_of_turns = 0
+
     def play(self):  # kies actie
         for agent in self.working_agents:
+            self.total_nr_of_turns += 1
             available = self.available_items[self.current_order]
             print("Het is de beurt van: ", agent.name)
             print("current order agent: ", agent.current_order)
@@ -32,10 +40,12 @@ class centralised_agent(object):
                 self.grid.stop()
 
             elif len(self.developing_orders[self.current_order])==0: #als de huidige order voldaan is, ga naar de volgende
+                self.nr_of_next_order += 1
                 self.current_order = self.current_order + 1
 
             elif (len(available) == 0 and agent.current_order == self.highest_order and len(agent.appointed_items) == 0 #als toch alles leeg is moet je wachten op de andere agent
                  and len(agent.storage) == 0):
+                self.nr_of_turns_waiting += 1
                 print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
 
             elif (agent.capacity > len(agent.appointed_items) and len(available) != 0 and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
@@ -80,6 +90,7 @@ class centralised_agent(object):
             agent.move(next_pos)
         elif util.adjacent(agent.current_position, next_pos):
             # als er een agent is wijken we uit naar rechts.
+            self.nr_of_conflicts += 1
             alternative_position = util.move_right(agent.current_position, next_pos, self.grid.size)
             agent.move(alternative_position)
         else:

@@ -211,3 +211,42 @@ class Centralised_grid(Grid):
                 central_agent.play()
                 #self.grid_ui.update_ui(self.logic_grid)
                 #time.sleep(0.1)
+        if not self.running:
+            for agent in self.working_agents:
+                if self.record_stats:
+                    result = pd.read_csv("Centralised worker" + agent.name + ".csv")
+                    all_features = [agent.nr_of_turns_moving, agent.nr_of_turns_picking_up, agent.nr_of_turns_depositing]
+                    result["Order " + str(globals.order_number)] = all_features
+                    os.remove("Centralised decision maker" + agent.name + ".csv")
+                    result = result.rename_axis('index')
+                    result = result.drop(columns=["index"])
+                    result.to_csv("Centralised worker " + agent.name + ".csv")
+
+                print(agent.name, "statistics: ")
+                print("succes! all orders fulfilled\n")
+                print("Nr of turns moving: ", agent.nr_of_turns_moving)
+                print("Nr of turn picking up items: ", agent.nr_of_turns_picking_up)
+                print("Nr of turns depositing: ", agent.nr_of_turns_depositing)
+                print("")
+
+            for agent in self.central_agents:
+                if self.record_stats:
+                    result = pd.read_csv("Centralised decision maker" + agent.name + ".csv")
+                    all_features = [agent.nr_of_turns_choosing, agent.nr_of_turns_waiting, agent.nr_of_conflicts, agent.nr_of_next_order, agent.total_nr_of_turns]
+                    result["Order " + str(globals.order_number)] = all_features
+                    os.remove("Centralised decision maker" + agent.name + ".csv")
+                    result = result.rename_axis('index')
+                    result = result.drop(columns=["index"])
+                    result.to_csv("Centralised decision maker" + agent.name + ".csv")
+
+                print(agent.name, "statistics: ")
+                print("succes! all orders fulfilled\n")
+                print("Nr of turns choosing: ", agent.nr_of_turns_choosing)
+                print("Nr of turns waiting: ", agent.nr_of_turns_waiting)
+                print("Nr of conflicts: ", agent.nr_of_conflicts)
+                print("Nr of going to next order:", agent.nr_of_next_order)
+                print("Total nr of moves: ", agent.total_nr_of_turns)
+                print("")
+
+
+
