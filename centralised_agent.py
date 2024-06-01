@@ -2,6 +2,8 @@ import grid_classes
 import math
 import util
 import following_agent
+
+
 class centralised_agent(object):
     def __init__(self, grid, following_agents, choosing_strategy, move_strategy, name):
         self.working_agents: list[following_agent.following_agent] = following_agents

@@ -26,6 +26,7 @@ def iteratie_loop(lijst_van_paren, decentralised):
             new_grid.broadcast_order(order)
             new_grid.play()
 
+
 if __name__ == "__main__":
     test_items.init_orders()
     iteratie_loop(globals.orders_and_dicts, True)
