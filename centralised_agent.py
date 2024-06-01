@@ -1,6 +1,3 @@
-#TODO add centralised agent
-#TODO implement centralised agent
-#TODO heel veel van de functies kunnen naar util verhuizen???
 import grid_classes
 import math
 import util
