@@ -6,7 +6,9 @@ import grid_classes
 import decentralised_agent
 import centralised_agent
 import visual_grid
-
+import pandas as pd
+import os
+from globals import *
 
 class Grid(object):
     def __init__(self, item_to_pos_dict, size, cell_size=30):
@@ -139,6 +141,15 @@ class Decentralised_grid(Grid):  # het logische grid
             time.sleep(0.1)
         if not self.running:
             for agent in self.agents:
+                result = pd.read_csv("Decentralised " + agent.name + ".csv")
+                all_features = [agent.nr_of_turns_choosing, agent.nr_of_turns_moving, agent.nr_of_turns_waiting, agent.nr_of_conflicts, agent.nr_of_turns_picking_up, agent.nr_of_turns_depositing, agent.nr_of_next_order, agent.total_nr_of_turns]
+                result[globals.order_name] = all_features
+                globals.order_number += 1
+                os.remove("Decentralised " + agent.name + ".csv")
+                result = result.rename_axis('index')
+                result = result.drop(columns=["index"])
+                result.to_csv("Decentralised " + agent.name + ".csv")
+
                 print(agent.name, "statistics: ")
                 print("succes! all orders fulfilled\n")
                 print("Nr of turns choosing: ", agent.nr_of_turns_choosing)
