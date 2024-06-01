@@ -2,6 +2,8 @@ import math
 import util
 import grid_classes
 import logic_grid
+
+
 class Decentralised_agent(object):
     def __init__(self, grid, strategy, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie
@@ -28,6 +30,7 @@ class Decentralised_agent(object):
         self.nr_of_turns_depositing = 0
         self.nr_of_turns_picking_up = 0
         self.nr_of_turns_waiting = 0
+        self.nr_of_next_order = 0
         self.total_nr_of_turns = 0
 
     def play(self):  # kies actie
@@ -41,8 +44,8 @@ class Decentralised_agent(object):
         print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
-            self.grid.stop()
             print("succes! all orders fulfilled\n")
+            self.grid.stop()
         elif len(available) == 0 and self.current_order == self.highest_order and len(self.chosen_items) == 0 and len(self.storage) == 0:
             self.nr_of_turns_waiting += 1
             print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
@@ -50,6 +53,7 @@ class Decentralised_agent(object):
             self.nr_of_turns_choosing += 1
             self.choose_item()
         elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+            self.nr_of_next_order += 1
             self.next_order()
         elif self.grid.has_item(self.current_position, list(map(lambda tuple: tuple[0], self.chosen_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.nr_of_turns_picking_up += 1
@@ -95,7 +99,7 @@ class Decentralised_agent(object):
     def choose_item(self):  # kiest een item a.d.h.v de strategie.
         available = self.available_items[self.current_order]
         other_agent_choices = self.agent_choices[self.current_order]
-        item = self.strategy(available, self.chosen_items, other_agent_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
+        item = self.strategy(available, list(map(lambda tuple: tuple[0], self.chosen_items)), other_agent_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available_items[self.current_order].remove(item)
         self.chosen_items.append((item, self.current_order))  # we slagen op van welk order het item dat we reserveren is, anders komen er problemen bij de overlap van 2 bestellingen (self.current_order komt dan niet helemaal overeen)
         print(item.name, "was chosen\n")
