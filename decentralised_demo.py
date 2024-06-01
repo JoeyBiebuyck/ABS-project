@@ -12,9 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-
-#TODO initialize voor de bigdog en smaalbrain agents
-#TODO make it easy to switch between centralised and decentralised
 #TODO standaard testen maken voor de onderzoeksvraag
 #TODO counter voor de efficientie
 
@@ -31,7 +28,7 @@ def joey_loop (lijst_van_paren):
     grid_size = 5
     util.init_stat_files(["Agent 0", "Agent 1"], decentralised=True)
     for order, item_dict in lijst_van_paren:
-        new_grid = logic_grid.Decentralised_grid(item_dict, grid_size, strategy=strategies.strat_k_means, nr_of_agents=2)
+        new_grid = logic_grid.Decentralised_grid(item_dict, grid_size, strategy=strategies.strategy_1, nr_of_agents=2)
         new_grid.broadcast_order(order)
         new_grid.play()
 

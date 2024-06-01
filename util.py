@@ -82,7 +82,7 @@ def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de r
         pot_next_pos = [pos[0] + 1, pos[1]]
     elif next_pos[1] == pos[1] - 1:
         pot_next_pos = [pos[0] - 1, pos[1]]
-
+    else: pot_next_pos = pos
     if out_of_bounds(pot_next_pos, grid_size):
         return pos
     else: return pot_next_pos
