@@ -17,7 +17,13 @@ class following_agent(object):
         self.current_order = 0
         self.to_get_item = False
 
+        # FOR TESTING:
+        self.nr_of_turns_moving = 0
+        self.nr_of_turns_depositing = 0
+        self.nr_of_turns_picking_up = 0
+
     def move(self, next_pos):
+        self.nr_of_turns_moving += 1
         curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
         # als er geen agent is gaan we gwn naar de volgende positie
@@ -27,6 +33,7 @@ class following_agent(object):
             self.current_position = next_pos
 
     def pick_up(self):
+        self.nr_of_turns_picking_up += 1
         row, col = self.current_position
         item = self.grid.logic_grid[row][col].item
         self.storage.append(item)
@@ -34,6 +41,7 @@ class following_agent(object):
         self.to_get_item = False
 
     def deposit(self):
+        self.nr_of_turns_depositing += 1
         print(self.name, " depositing")
         row, col = self.current_position
         item = self.storage.pop()
