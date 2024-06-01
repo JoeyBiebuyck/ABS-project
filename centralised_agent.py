@@ -23,23 +23,24 @@ class centralised_agent(object):
         for agent in self.working_agents:
             available = self.available_items[self.current_order]
             print("Het is de beurt van: ", agent.name)
-            print("current order: ", self.current_order)
+            print("current order boss: ", agent.current_order)
+            print("current order agent: ", agent.current_order)
             print("available items: ", list(map(lambda product: product.name, available)))
             print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
+            print("appointed items: ", agent.appointed_items)
 
-            if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
+            if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, stop de grid
                 print("succes! all orders fulfilled\n")
                 self.grid.stop()
 
-            elif len(self.developing_orders[self.current_order])==0:
+            elif len(self.developing_orders[self.current_order])==0: #als de huidige order voldaan is, ga naar de volgende
                 self.current_order = self.current_order + 1
 
-            elif (len(available) == 0 and self.current_order == self.highest_order and len(agent.appointed_items) == 0
-                  and len(agent.storage) == 0):
+            elif (len(available) == 0 and agent.current_order == self.highest_order and len(agent.appointed_items) == 0 #als toch alles leeg is moet je wachten op de andere agent
+                 and len(agent.storage) == 0):
                 print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
 
-            elif (agent.capacity > len(agent.appointed_items) and len(available) != 0
-                  and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+            elif (agent.capacity > len(agent.appointed_items) and len(available) != 0 and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
                 self.appoint_item(agent)
 
             elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
@@ -70,7 +71,8 @@ class centralised_agent(object):
         for other_agent in filter(lambda agent_in_working_agents: agent_in_working_agents != agent, self.working_agents):
             other_agent_choices += other_agent.appointed_items
         item = self.choosing_strategy(available, agent.appointed_items, other_agent_choices, agent.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
-        self.available_items[self.current_order].remove(item)
+        print("item to appoint is: ", item.name)
+        self.available_items[agent.current_order].remove(item)
         agent.appointed_items.append(item)
         print(item.name, "was chosen\n")
 

@@ -13,7 +13,7 @@ class following_agent(object):
         self.grid: logic_grid.Grid = grid  # logic grid
         self.available: list[grid_classes.Product] = []  # items van de order die nog niet gereserveerd zijn
         self.name = "Agent " + str(name)
-        self.appointed_items: list[grid_classes.Product] = []
+        self.appointed_items: list[(grid_classes.Product, int)] = [] #toegewezen items door de centrale agent
         self.current_order = 0
         self.to_get_item = False
 
@@ -29,14 +29,20 @@ class following_agent(object):
     def pick_up(self):
         row, col = self.current_position
         item = self.grid.logic_grid[row][col].item
-        self.storage.append(item)
-        self.appointed_items.remove(item)
+        order_nr = -1
+        for tuple in self.appointed_items:  # omdat het een lijst van tuples is moet er geïtereerd worden over de lijst om het eerste element van de tuple te matchen, want we willen dat precies 1 tuple verwijderd wordt, niet meerdere
+            if tuple[0] == item:
+                order_nr = tuple[1]
+                self.appointed_items.remove(tuple)
+                break
+        #  self.chosen_items.remove(item)
+        self.storage.append((item, order_nr))
         self.to_get_item = False
 
     def deposit(self):
         print(self.name, " depositing")
         row, col = self.current_position
-        item = self.storage.pop()
+        item, order_nr = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
-        return item
+        return item, order_nr
