@@ -1,8 +1,9 @@
 import math
-import random
 from sklearn.cluster import KMeans
+import random
 import numpy as np
-def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy): # neemt het verste item van een item gekozen door een andere agent
+
+def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []
     for item in available:

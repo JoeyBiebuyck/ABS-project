@@ -1,7 +1,9 @@
 import numpy as np
 import random
 import math
+import pandas as pd
 
+random.seed(1)
 
 class PriorityQueue:
     def __init__(self):
@@ -154,4 +156,27 @@ def distance_to_item_score(distance):
         return 100
     else:
         return max (0, 50 - distance)
+
+
+# Initialiseer de data collectie
+def init_stat_files(agents_names_list, decentralised=True):
+    kind = None
+    if decentralised:
+        kind = "Decentralised "
+    else:
+        kind = "Centralised "
+    result = pd.DataFrame()
+    result = result.rename_axis('index')
+    rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
+            "turns depositing", "times going to next order", "total amount of turns"]
+    row_name_dict = {}
+    for index, row_name in zip(range(0, len(rows)), rows):
+        row_name_dict[index] = row_name
+
+    result["index"] = list(range(0, len(rows)))
+    result["row names"] = result["index"].map(row_name_dict)
+    result = result.drop(columns=["index"])
+
+    for name in agents_names_list:
+        result.to_csv(kind + name + ".csv")
 

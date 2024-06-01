@@ -36,6 +36,7 @@ class Decentralised_agent(object):
     def play(self):  # kies actie
         self.total_nr_of_turns += 1
         available = self.available_items[self.current_order]
+        my_row, my_col = self.current_position
         print("Het is de beurt van: ", self.name)
         print("my choices: ", list(map(lambda product: product[0].name, self.chosen_items)))
         print("my storage: ", list(map(lambda product: product[0].name, self.storage)))
@@ -43,6 +44,11 @@ class Decentralised_agent(object):
         print("current order: ", self.current_order)
         print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
+
+        print("chosen items: ", list(map(lambda tuple: tuple[0].name, self.chosen_items)))
+        print("item on position: ", self.grid.logic_grid[my_row][my_col].item)
+        print("has item? ", self.grid.has_item(self.current_position, list(map(lambda tuple: tuple[0], self.chosen_items))))
+
         if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, ben je klaar
             print("succes! all orders fulfilled\n")
             self.grid.stop()
@@ -75,8 +81,9 @@ class Decentralised_agent(object):
         print("picking up :", item.name, "\n")
         order_nr = -1
         for tuple in self.chosen_items:  # omdat het een lijst van tuples is moet er geïtereerd worden over de lijst om het eerste element van de tuple te matchen, want we willen dat precies 1 tuple verwijderd wordt, niet meerdere
-            if tuple[0] == item:
-                order_nr = tuple[1]
+            product, order_number = tuple
+            if product == item:
+                order_nr = order_number
                 self.chosen_items.remove(tuple)
                 break
       #  self.chosen_items.remove(item)
