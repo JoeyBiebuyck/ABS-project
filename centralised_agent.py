@@ -23,11 +23,12 @@ class centralised_agent(object):
         for agent in self.working_agents:
             available = self.available_items[self.current_order]
             print("Het is de beurt van: ", agent.name)
-            print("current order boss: ", agent.current_order)
             print("current order agent: ", agent.current_order)
             print("available items: ", list(map(lambda product: product.name, available)))
-            print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
-            print("appointed items: ", agent.appointed_items)
+            print("appointed: ", list(map(lambda tuple: (tuple[0].name, tuple[1]), agent.appointed_items)))
+            print("developing items: ")
+            for k, v in self.developing_orders.items():
+                                            print(k, list(map(lambda product: product.name,v)))
 
             if len(self.developing_orders[self.highest_order]) == 0:  # als de laatste order helemaal gedaan is, stop de grid
                 print("succes! all orders fulfilled\n")
@@ -46,7 +47,7 @@ class centralised_agent(object):
             elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
                 self.next_order(agent)
 
-            elif self.grid.has_item(agent.current_position,agent.appointed_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+            elif self.grid.has_item(agent.current_position,list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
                 self.make_pick_up(agent)
 
             elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items
@@ -61,8 +62,8 @@ class centralised_agent(object):
 
     def next_order(self, agent):
         print("going to the next order")
-        print("available items are:", list(map(lambda item: item.name, self.available_items[self.current_order])))
-        print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[self.current_order])),"\n")
+        print("available items are:", list(map(lambda item: item.name, self.available_items[agent.current_order])))
+        print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[agent.current_order])),"\n")
         agent.current_order += 1
 
     def appoint_item(self, agent):#kiest item a.d.h.v. strategie en geeft het aan de agent
@@ -70,10 +71,9 @@ class centralised_agent(object):
         other_agent_choices = []
         for other_agent in filter(lambda agent_in_working_agents: agent_in_working_agents != agent, self.working_agents):
             other_agent_choices += other_agent.appointed_items
-        item = self.choosing_strategy(available, agent.appointed_items, other_agent_choices, agent.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
-        print("item to appoint is: ", item.name)
-        self.available_items[agent.current_order].remove(item)
-        agent.appointed_items.append(item)
+        item = self.choosing_strategy(available, list(map(lambda tuple: tuple[0], agent.appointed_items)),  list(map(lambda tuple: tuple[0], other_agent_choices)), agent.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
+        self.available_items[self.current_order].remove(item)
+        agent.appointed_items.append((item, self.current_order))
         print(item.name, "was chosen\n")
 
     def make_move(self, agent, next_pos):
@@ -92,8 +92,10 @@ class centralised_agent(object):
         agent.pick_up()
 
     def make_deposit(self,agent):
-        item = agent.deposit()
-        self.developing_orders[agent.current_order].remove(item)
+        item, order_nr = agent.deposit()
+        print(" deposit item: ", item.name)
+        print("order_nr deposit: ", order_nr)
+        self.developing_orders[order_nr].remove(item)
 
     def find_way_home(self,agent):
         print("returning home!!!")
@@ -109,15 +111,16 @@ class centralised_agent(object):
         print("selecting move")
         pos_chosen_items = []
         distance_to_available_items = []
+        appointed_items_without_order = list(map(lambda tuple: tuple[0], agent.appointed_items))
         if not agent.to_get_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
-            for item in agent.appointed_items:  # gebruiken twee for loops om het dichtste object te kiezen.
+            for item in appointed_items_without_order:  # gebruiken twee for loops om het dichtste object te kiezen.
                 position_object = self.grid.items_to_pos_dict.get(item)
                 pos_chosen_items.append(position_object)
             for pos in pos_chosen_items:
                 distance_to_available_items.append(math.dist(agent.current_position, pos))
             if len(distance_to_available_items) != 0:
                 # selected_item is het item waar we achter gaan
-                agent.to_get_item = agent.appointed_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+                agent.to_get_item = appointed_items_without_order[(distance_to_available_items.index(min(distance_to_available_items)))]
         print("selected item: ", agent.to_get_item.name)
 
         # start and goal position for a star

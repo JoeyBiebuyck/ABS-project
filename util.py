@@ -80,7 +80,6 @@ def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de r
         pot_next_pos = [pos[0] + 1, pos[1]]
     elif next_pos[1] == pos[1] - 1:
         pot_next_pos = [pos[0] - 1, pos[1]]
-
     if out_of_bounds(pot_next_pos, grid_size):
         return pos
     else: return pot_next_pos
@@ -93,8 +92,11 @@ def adjacent(pos1, pos2):
 
 
 def out_of_bounds(pos, size):
-    row, col = pos
-    return row < 0 or row > size-1 or col < 0 or col > size-1
+    if not pos == 0:
+        row, col = pos
+        # if not row == 0 or not col == 0:
+        return row < 0 or row > size-1 or col < 0 or col > size-1
+
 
 
 def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item to position dictionary

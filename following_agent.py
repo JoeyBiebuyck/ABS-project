@@ -20,6 +20,7 @@ class following_agent(object):
     def move(self, next_pos):
         curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
+
         # als er geen agent is gaan we gwn naar de volgende positie
         if not util.out_of_bounds(next_pos, self.grid.size):
             self.grid.logic_grid[curr_pos_row][curr_pos_col].agent = None
@@ -45,4 +46,4 @@ class following_agent(object):
         item, order_nr = self.storage.pop()
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
-        return item, order_nr
+        return (item, order_nr)
