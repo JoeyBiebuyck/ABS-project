@@ -11,7 +11,7 @@ class Decentralised_agent(object):
         self.storage = []  # wat zit er al in de storage
         self.strategy = strategy  # welke strategie op dit moment strat 1 is selected
         self.grid: logic_grid.Decentralised_grid = grid  # logic grid
-        self.chosen_items: list[grid_classes.Product] = []  # items die agent zelf koos
+        self.chosen_items: list[(grid_classes.Product, int)] = []  # items die agent zelf koos
         self.selected_item = False  # item dat de agent momenteel achter gaat
         self.highest_order = 0
         self.current_order = 0
@@ -24,6 +24,9 @@ class Decentralised_agent(object):
     def play(self):  # kies actie
         available = self.available_items[self.current_order]
         print("Het is de beurt van: ", self.name)
+        print("my choices: ", list(map(lambda product: product[0].name, self.chosen_items)))
+        print("my storage: ", list(map(lambda product: product[0].name, self.storage)))
+        print("other agent choices: ", list(map(lambda product: product.name, self.agent_choices[self.current_order])))
         print("current order: ", self.current_order)
         print("available items: ", list(map(lambda product: product.name, available)))
         print("developing items: ", list(map(lambda product: product.name, self.developing_orders[self.current_order])))
@@ -37,7 +40,7 @@ class Decentralised_agent(object):
             self.choose_item()
         elif self.highest_order > self.current_order and self.capacity > len(self.chosen_items) and len(available) == 0 and len(self.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
             self.next_order()
-        elif self.grid.has_item(self.current_position, self.chosen_items):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+        elif self.grid.has_item(self.current_position, list(map(lambda tuple: tuple[0], self.chosen_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
             self.pick_up()
         elif self.grid.is_loading_dock(self.current_position, self) and len(self.storage) != 0:  # als je op je loading dock bent, deposit je items
             self.deposit()
@@ -51,29 +54,35 @@ class Decentralised_agent(object):
         row, col = self.current_position
         item: grid_classes.Product = self.grid.logic_grid[row][col].item
         print("picking up :", item.name, "\n")
-        self.chosen_items.remove(item)
-        self.storage.append(item)
+        order_nr = -1
+        for tuple in self.chosen_items:  # omdat het een lijst van tuples is moet er geïtereerd worden over de lijst om het eerste element van de tuple te matchen, want we willen dat precies 1 tuple verwijderd wordt, niet meerdere
+            if tuple[0] == item:
+                order_nr = tuple[1]
+                self.chosen_items.remove(tuple)
+                break
+      #  self.chosen_items.remove(item)
+        self.storage.append((item, order_nr))
         self.selected_item = False
         for agent in self.other_agents:
-            agent.agent_choices[self.current_order].remove(item)
+            agent.agent_choices[order_nr].remove(item)
 
     def deposit(self):  # geeft item af aan een loading dock
         row, col = self.current_position
-        item = self.storage.pop()
+        item, order_nr = self.storage.pop()
         print("depositing", item.name)
         loading_dock = self.grid.logic_grid[row][col].loading_dock
         loading_dock.contents.append(item)
-        self.developing_orders[self.current_order].remove(item)
-        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[self.current_order]), "\n")
+        self.developing_orders[order_nr].remove(item)
+        print("amount of items that need to be deposited for this order to be completed: ", len(self.developing_orders[order_nr]), "\n")
         for agent in self.other_agents:
-            agent.developing_orders[self.current_order].remove(item)
+            agent.developing_orders[order_nr].remove(item)
 
     def choose_item(self):  # kiest een item a.d.h.v de strategie.
         available = self.available_items[self.current_order]
         other_agent_choices = self.agent_choices[self.current_order]
         item = self.strategy(available, self.chosen_items, other_agent_choices, self.current_position, self.grid.items_to_pos_dict)  # verander hier de keuze methode
         self.available_items[self.current_order].remove(item)
-        self.chosen_items.append(item)
+        self.chosen_items.append((item, self.current_order))  # we slagen op van welk order het item dat we reserveren is, anders komen er problemen bij de overlap van 2 bestellingen (self.current_order komt dan niet helemaal overeen)
         print(item.name, "was chosen\n")
         for agent in self.other_agents:
             agent.agent_choices[self.current_order].append(item)  # zeg tegen andere agenten welk item je hebt gekozen
@@ -107,14 +116,14 @@ class Decentralised_agent(object):
         pos_chosen_items = []
         distance_to_available_items = []
         if not self.selected_item:  # als we nog niet achter een item gaan , kiezen we een nieuw dichste item
-            for item in self.chosen_items: #gebruiken twee for loops om het dichtste object te kiezen.
+            for item in list(map(lambda tuple: tuple[0], self.chosen_items)): #gebruiken twee for loops om het dichtste object te kiezen.
                 position_object = self.grid.items_to_pos_dict.get(item)
                 pos_chosen_items.append(position_object)
             for pos in pos_chosen_items:
                 distance_to_available_items.append(math.dist(self.current_position, pos))
             if len(distance_to_available_items) != 0:
                 #selected_item is het item waar we achter gaan
-                self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))]
+                self.selected_item = self.chosen_items[(distance_to_available_items.index(min(distance_to_available_items)))][0]
         print("selected item: ", self.selected_item.name)
 
         # start and goal position for a star
