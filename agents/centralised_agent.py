@@ -1,10 +1,9 @@
 #TODO add centralised agent
 #TODO implement centralised agent
 #TODO heel veel van de functies kunnen naar util verhuizen???
-import grid_classes
 import math
-import util
-import following_agent
+from utilities import util
+from agents import following_agent
 class centralised_agent(object):
     def __init__(self, grid, following_agents, choosing_strategy, move_strategy, name):
         self.working_agents: list[following_agent.following_agent] = following_agents

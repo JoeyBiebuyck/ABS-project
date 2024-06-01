@@ -1,7 +1,7 @@
-import util
-import grid_classes
+from utilities import util
+from grids import grid_classes
 import random
-import globals
+from utilities import globals
 
 random.seed(1)
 
@@ -17,7 +17,7 @@ def init_orders():
 
 
     for _ in range(nr_of_examples):
-        coordinates = [util.generate_random_coordinate(0, grid_size-2, 0, grid_size-1) for _ in range(order_len)]
+        coordinates = [util.generate_random_coordinate(0, grid_size - 2, 0, grid_size - 1) for _ in range(order_len)]
         # order = [(producten_lijst[i], coordinates[i]) for i in range(order_len)]
         order = util.generate_order(producten_lijst, order_len, unique=True)
         item_to_pos_dict = {product: coordinates[i] for i, product in enumerate(producten_lijst)}

@@ -1,16 +1,8 @@
 import threading
 
-import decentralised_agent
-import globals
-import strategies
-import util
-import grid_classes
-import logic_grid
-import test_items
+from grids import logic_grid
+from utilities import test_items, globals, strategies, util
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 
 #TODO standaard testen maken voor de onderzoeksvraag
 #TODO counter voor de efficientie
