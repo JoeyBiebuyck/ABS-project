@@ -1,0 +1,9 @@
+index,row names,Order 1,Order 2,Order 3,Order 4,Order 5
+0,Turns choosing,4,4,3,4,2
+1,turns moving,26,24,22,16,14
+2,turns waiting,0,0,0,0,14
+3,number of conflicts,1,0,0,0,0
+4,turns picking up,4,4,3,4,2
+5,turns depositing,4,4,3,4,2
+6,times going to next order,0,0,0,0,0
+7,total amount of turns,38,36,32,28,35

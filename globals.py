@@ -1,4 +1,3 @@
-order_number = 1
-order_name = "Order " + str(order_number)
+order_number = 0
 
 orders_and_dicts = []
