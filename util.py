@@ -160,26 +160,68 @@ def distance_to_item_score(distance):
 
 # Initialiseer de data collectie
 def init_stat_files(agents_names_list, decentralised=True):
-    kind = None
+    # kind = None
+    # if decentralised:
+    #     kind = "Decentralised "
+    # else:
+    #     kind = "Centralised worker "
+    # result = pd.DataFrame()
+    # result = result.rename_axis('index')
+    # rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
+    #         "turns depositing", "times going to next order", "total amount of turns"]
+    # row_name_dict = {}
+    # for index, row_name in zip(range(0, len(rows)), rows):
+    #     row_name_dict[index] = row_name
+    #
+    # result["index"] = list(range(0, len(rows)))
+    # result["row names"] = result["index"].map(row_name_dict)
+    # result = result.drop(columns=["index"])
+    #
+    # for name in agents_names_list:
+    #     result.to_csv(kind + name + ".csv")
+    #
+    # if not decentralised:
+    #     result.to_csv("Centralised decision maker " + "Agent 1" + ".csv")
+
     if decentralised:
-        kind = "Decentralised "
+        result = pd.DataFrame()
+        result = result.rename_axis('index')
+        rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
+                "turns depositing", "times going to next order", "total amount of turns"]
+        row_name_dict = {}
+        for index, row_name in zip(range(0, len(rows)), rows):
+            row_name_dict[index] = row_name
+
+        result["index"] = list(range(0, len(rows)))
+        result["row names"] = result["index"].map(row_name_dict)
+        result = result.drop(columns=["index"])
+
+        for name in agents_names_list:
+            result.to_csv("Decentralised " + name + ".csv")
+
     else:
-        kind = "Centralised worker "
-    result = pd.DataFrame()
-    result = result.rename_axis('index')
-    rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
-            "turns depositing", "times going to next order", "total amount of turns"]
-    row_name_dict = {}
-    for index, row_name in zip(range(0, len(rows)), rows):
-        row_name_dict[index] = row_name
+        result_workers = pd.DataFrame()
+        result_workers = result_workers.rename_axis('index')
+        rows = ["turns moving", "turns picking up", "turns depositing"]
+        row_name_dict = {}
+        for index, row_name in zip(range(0, len(rows)), rows):
+            row_name_dict[index] = row_name
 
-    result["index"] = list(range(0, len(rows)))
-    result["row names"] = result["index"].map(row_name_dict)
-    result = result.drop(columns=["index"])
+        result_workers["index"] = list(range(0, len(rows)))
+        result_workers["row names"] = result_workers["index"].map(row_name_dict)
+        result_workers = result_workers.drop(columns=["index"])
 
-    for name in agents_names_list:
-        result.to_csv(kind + name + ".csv")
+        for name in agents_names_list:
+            result_workers.to_csv("Centralised worker " + name + ".csv")
 
-    if not decentralised:
-        result.to_csv("Centralised decision maker " + "Agent 1" + ".csv")
+        result_central = pd.DataFrame()
+        result_central = result_central.rename_axis('index')
+        rows_central = ["Turns choosing", "turns waiting", "number of conflicts", "times going to next order", "total amount of turns"]
+        row_name_dict_central = {}
+        for index, row_name in zip(range(0, len(rows_central)), rows_central):
+            row_name_dict_central[index] = row_name
 
+        result_central["index"] = list(range(0, len(rows_central)))
+        result_central["row names"] = result_central["index"].map(row_name_dict_central)
+        result_central = result_central.drop(columns=["index"])
+        result_central.to_csv("Centralised decision maker Agent.csv")

@@ -22,7 +22,6 @@ class Grid(object):
         self.nr_of_orders = 0
         self.record_stats = record_stats
 
-
     def find(self, item_name):  # functie om te vinden waar een item is in de grid
         return self.items_to_pos_dict(item_name)
 
@@ -171,6 +170,7 @@ class Centralised_grid(Grid):
         self.working_agents = [following_agent.following_agent(self, agent_nr, capacity=agent_capacity) for agent_nr in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.central_agents = [centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]
         self.init_agents()
+        self.populate_grid()
 
     def init_agents(self):  # geeft de agenten hun startpositie en een lijst van andere agenten
         current_starting_pos = 0
@@ -214,10 +214,10 @@ class Centralised_grid(Grid):
         if not self.running:
             for agent in self.working_agents:
                 if self.record_stats:
-                    result = pd.read_csv("Centralised worker" + agent.name + ".csv")
+                    result = pd.read_csv("Centralised worker " + agent.name + ".csv")
                     all_features = [agent.nr_of_turns_moving, agent.nr_of_turns_picking_up, agent.nr_of_turns_depositing]
                     result["Order " + str(globals.order_number)] = all_features
-                    os.remove("Centralised decision maker" + agent.name + ".csv")
+                    os.remove("Centralised worker " + agent.name + ".csv")
                     result = result.rename_axis('index')
                     result = result.drop(columns=["index"])
                     result.to_csv("Centralised worker " + agent.name + ".csv")
@@ -231,13 +231,13 @@ class Centralised_grid(Grid):
 
             for agent in self.central_agents:
                 if self.record_stats:
-                    result = pd.read_csv("Centralised decision maker" + agent.name + ".csv")
+                    result = pd.read_csv("Centralised decision maker Agent.csv")
                     all_features = [agent.nr_of_turns_choosing, agent.nr_of_turns_waiting, agent.nr_of_conflicts, agent.nr_of_next_order, agent.total_nr_of_turns]
                     result["Order " + str(globals.order_number)] = all_features
-                    os.remove("Centralised decision maker" + agent.name + ".csv")
+                    os.remove("Centralised decision maker Agent.csv")
                     result = result.rename_axis('index')
                     result = result.drop(columns=["index"])
-                    result.to_csv("Centralised decision maker" + agent.name + ".csv")
+                    result.to_csv("Centralised decision maker Agent.csv")
 
                 print(agent.name, "statistics: ")
                 print("succes! all orders fulfilled\n")

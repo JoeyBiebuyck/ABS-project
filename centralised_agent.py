@@ -32,6 +32,7 @@ class centralised_agent(object):
         for agent in self.working_agents:
             self.total_nr_of_turns += 1
             available = self.available_items[self.current_order]
+            my_row, my_col = agent.current_position
             print("Het is de beurt van: ", agent.name)
             print("current order agent: ", agent.current_order)
             print("available items: ", list(map(lambda product: product.name, available)))
@@ -61,7 +62,7 @@ class centralised_agent(object):
             elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
                 self.next_order(agent)
 
-            elif self.grid.has_item(agent.current_position,list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+            elif self.grid.has_item(agent.current_position, list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
                 self.make_pick_up(agent)
 
             elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items

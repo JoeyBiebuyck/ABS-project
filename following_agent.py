@@ -19,8 +19,8 @@ class following_agent(object):
 
         # FOR TESTING:
         self.nr_of_turns_moving = 0
-        self.nr_of_turns_depositing = 0
         self.nr_of_turns_picking_up = 0
+        self.nr_of_turns_depositing = 0
 
     def move(self, next_pos):
         self.nr_of_turns_moving += 1
