@@ -14,7 +14,7 @@ def iteratie_loop(lijst_van_paren, decentralised):
             print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
             globals.order_number += 1
             print("current global order number: ", globals.order_number)
-            new_grid = logic_grid.Decentralised_grid(item_dict, grid_size, strategy=strategies.strategy_1, nr_of_agents=2, record_stats=True)
+            new_grid = logic_grid.Decentralised_grid(item_dict, grid_size, strategy=strategies.strat_k_means, nr_of_agents=2, record_stats=True)
             new_grid.broadcast_order(order)
             new_grid.play()
     else:
@@ -22,7 +22,7 @@ def iteratie_loop(lijst_van_paren, decentralised):
             print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
             globals.order_number += 1
             print("current global order number: ", globals.order_number)
-            new_grid = logic_grid.Centralised_grid(item_dict, grid_size, choose_strategy=strategies.strategy_1, nr_of_agents=2, record_strats=True)
+            new_grid = logic_grid.Centralised_grid(item_dict, grid_size, choose_strategy=strategies.strat_k_means, nr_of_agents=2, record_strats=True)
             new_grid.broadcast_order(order)
             new_grid.play()
 

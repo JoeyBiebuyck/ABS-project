@@ -11,7 +11,7 @@ def init_orders():
     items = ["apple", "peach", "banana", "strawberry", "watermelon", "orange"]
     producten_lijst = [grid_classes.Product(items[i]) for i in range(6)]
 
-    nr_of_examples = 5
+    nr_of_examples = 30
     grid_size = 5
     order_len = 6
 
@@ -22,9 +22,7 @@ def init_orders():
                                                  grid_size - 1)  # onderste rij is gereserveerd voor load docks
             if new_pos not in coordinates:
                 coordinates.append(new_pos)
-        # coordinates = [util.generate_random_coordinate(0, grid_size-2, 0, grid_size-1) for _ in range(order_len)]
 
-        # order = [(producten_lijst[i], coordinates[i]) for i in range(order_len)]
         order = util.generate_order(producten_lijst, order_len, unique=True)
         item_to_pos_dict = {product: coordinates[i] for i, product in enumerate(producten_lijst)}
         globals.orders_and_dicts.append((order, item_to_pos_dict))
