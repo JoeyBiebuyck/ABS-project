@@ -154,7 +154,9 @@ class Decentralised_agent(object):
         goal = self.grid.items_to_pos_dict.get(self.selected_item)
         path = util.astar(self.grid, start, goal)
         # volgende positie die we willen bereiken.
-        next_pos = path[0]
+        next_pos = self.current_position
+        if path is not None: # TODO: dit was om error te vermijden, kreeg none
+            next_pos = path[0]
         print("current position is", self.current_position)
         print("next_pos: ", next_pos)
         print("path is: ", path, "\n")
@@ -165,7 +167,9 @@ class Decentralised_agent(object):
         print("returning home!!!")
         print("current returning position is: ", self.current_position)
         return_path = util.astar(self.grid, self.current_position, self.starting_position)
-        next_pos = return_path[0]
+        next_pos = self.current_position
+        if return_path is not None: # TODO: ik kreeg een error dus daarom extra conditie
+            next_pos = return_path[0]
         print("going to: ", next_pos, "\n")
         return next_pos
 

@@ -1,0 +1,9 @@
+index,row names,Order 1,Order 2,Order 3,Order 4,Order 5,Order 6,Order 7,Order 8,Order 9,Order 10,Order 11,Order 12,Order 13,Order 14,Order 15,Order 16,Order 17,Order 18,Order 19,Order 20,Order 21,Order 22,Order 23,Order 24,Order 25,Order 26,Order 27,Order 28,Order 29,Order 30
+0,Turns choosing,4,4,3,4,2,3,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,4,4,2,4,4,4,4,4,4
+1,turns moving,26,24,22,16,14,16,20,14,12,22,26,16,18,16,24,20,16,12,16,16,22,24,16,16,30,14,20,16,12,26
+2,turns waiting,0,0,0,0,14,6,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0
+3,number of conflicts,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+4,turns picking up,4,4,3,4,2,3,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,4,4,2,4,4,4,4,4,4
+5,turns depositing,4,4,3,4,2,3,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,4,4,2,4,4,4,4,4,4
+6,times going to next order,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+7,total amount of turns,38,36,32,28,35,32,32,26,24,34,38,28,30,28,36,32,28,24,28,28,34,36,28,31,42,26,32,28,24,38

@@ -82,9 +82,14 @@ def move_right(pos, next_pos, grid_size):  # berekent de positie rechts van de r
         pot_next_pos = [pos[0] + 1, pos[1]]
     elif next_pos[1] == pos[1] - 1:
         pot_next_pos = [pos[0] - 1, pos[1]]
-    if out_of_bounds(pot_next_pos, grid_size):
+
+    print(pot_next_pos)
+    if len(pot_next_pos) == 0:
         return pos
-    else: return pot_next_pos
+    elif out_of_bounds(pot_next_pos, grid_size):
+        return pos
+    else:
+        return pot_next_pos
 
 
 def adjacent(pos1, pos2):
@@ -160,29 +165,6 @@ def distance_to_item_score(distance):
 
 # Initialiseer de data collectie
 def init_stat_files(agents_names_list, decentralised=True):
-    # kind = None
-    # if decentralised:
-    #     kind = "Decentralised "
-    # else:
-    #     kind = "Centralised worker "
-    # result = pd.DataFrame()
-    # result = result.rename_axis('index')
-    # rows = ["Turns choosing", "turns moving", "turns waiting", "number of conflicts", "turns picking up",
-    #         "turns depositing", "times going to next order", "total amount of turns"]
-    # row_name_dict = {}
-    # for index, row_name in zip(range(0, len(rows)), rows):
-    #     row_name_dict[index] = row_name
-    #
-    # result["index"] = list(range(0, len(rows)))
-    # result["row names"] = result["index"].map(row_name_dict)
-    # result = result.drop(columns=["index"])
-    #
-    # for name in agents_names_list:
-    #     result.to_csv(kind + name + ".csv")
-    #
-    # if not decentralised:
-    #     result.to_csv("Centralised decision maker " + "Agent 1" + ".csv")
-
     if decentralised:
         result = pd.DataFrame()
         result = result.rename_axis('index')
@@ -225,3 +207,17 @@ def init_stat_files(agents_names_list, decentralised=True):
         result_central["row names"] = result_central["index"].map(row_name_dict_central)
         result_central = result_central.drop(columns=["index"])
         result_central.to_csv("Centralised decision maker Agent.csv")
+
+def init_stat_files_OV2():
+    result = pd.DataFrame()
+    result = result.rename_axis('index')
+    rows = ["# products", "grid size", "order size", "# agents"]
+    row_name_dict = {}
+    for index, row_name in zip(range(0, len(rows)), rows):
+        row_name_dict[index] = row_name
+
+    result["index"] = list(range(0, len(rows)))
+    result["row names"] = result["index"].map(row_name_dict)
+    result = result.drop(columns=["index"])
+    result.to_csv("order info.csv")
+

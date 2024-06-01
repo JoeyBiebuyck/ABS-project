@@ -151,17 +151,26 @@ class Decentralised_grid(Grid):  # het logische grid
                     result = result.drop(columns=["index"])
                     result.to_csv("Decentralised " + agent.name + ".csv")
 
-                print(agent.name, "statistics: ")
-                print("succes! all orders fulfilled\n")
-                print("Nr of turns choosing: ", agent.nr_of_turns_choosing)
-                print("Nr of turns moving: ", agent.nr_of_turns_moving)
-                print("Nr of turns waiting: ", agent.nr_of_turns_waiting)
-                print("Nr of conflicts: ", agent.nr_of_conflicts)
-                print("Nr of turn picking up items: ", agent.nr_of_turns_picking_up)
-                print("Nr of turns depositing: ", agent.nr_of_turns_depositing)
-                print("Nr of going to next order:", agent.nr_of_next_order)
-                print("Total nr of moves: ", agent.total_nr_of_turns)
-                print("")
+                    result_info = pd.read_csv("order info.csv")
+                    info_features = [globals.nr_of_products, globals.grid_size, globals.order_size, globals.nr_of_agents]
+                    result_info["Order " + str(globals.order_number)] = info_features
+                    os.remove("order info.csv")
+                    result_info = result_info.rename_axis('index')
+                    result_info = result_info.drop(columns=["index"])
+                    result_info.to_csv("order info.csv")
+
+
+            print(agent.name, "statistics: ")
+            print("succes! all orders fulfilled\n")
+            print("Nr of turns choosing: ", agent.nr_of_turns_choosing)
+            print("Nr of turns moving: ", agent.nr_of_turns_moving)
+            print("Nr of turns waiting: ", agent.nr_of_turns_waiting)
+            print("Nr of conflicts: ", agent.nr_of_conflicts)
+            print("Nr of turn picking up items: ", agent.nr_of_turns_picking_up)
+            print("Nr of turns depositing: ", agent.nr_of_turns_depositing)
+            print("Nr of going to next order:", agent.nr_of_next_order)
+            print("Total nr of moves: ", agent.total_nr_of_turns)
+            print("")
 
 
 class Centralised_grid(Grid):
@@ -247,6 +256,3 @@ class Centralised_grid(Grid):
                 print("Nr of going to next order:", agent.nr_of_next_order)
                 print("Total nr of moves: ", agent.total_nr_of_turns)
                 print("")
-
-
-
