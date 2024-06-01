@@ -147,7 +147,7 @@ class Decentralised_grid(Grid):  # het logische grid
                 print("Nr of conflicts: ", agent.nr_of_conflicts)
                 print("Nr of turn picking up items: ", agent.nr_of_turns_picking_up)
                 print("Nr of turns depositing: ", agent.nr_of_turns_depositing)
-                print("Total nr of moves: ", agent.total_nr_of_moves)
+                print("Total nr of moves: ", agent.total_nr_of_turns)
                 print("")
 
 

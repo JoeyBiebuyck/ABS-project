@@ -28,10 +28,10 @@ class Decentralised_agent(object):
         self.nr_of_turns_depositing = 0
         self.nr_of_turns_picking_up = 0
         self.nr_of_turns_waiting = 0
-        self.total_nr_of_moves = 0
+        self.total_nr_of_turns = 0
 
     def play(self):  # kies actie
-        self.total_nr_of_moves += 1
+        self.total_nr_of_turns += 1
         available = self.available_items[self.current_order]
         print("Het is de beurt van: ", self.name)
         print("my choices: ", list(map(lambda product: product[0].name, self.chosen_items)))
