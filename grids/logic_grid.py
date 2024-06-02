@@ -189,7 +189,7 @@ class Centralised_grid(Grid):
     def init_agents(self):
         current_starting_pos = 0
         for agent in self.working_agents:
-            agent.starting_position = (self.size - 1, current_starting_pos)
+            agent.starting_position = (self.size - 1, current_starting_pos)  # gaat de onderste rij af vanaf links en selecteert voor elke agent een startpositie
             agent.current_position = agent.starting_position
             current_starting_pos += 1
 
