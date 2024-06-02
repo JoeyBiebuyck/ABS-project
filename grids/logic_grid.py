@@ -148,13 +148,14 @@ class Decentralised_grid(Grid):  # het logische grid
                     result = result.drop(columns=["index"])
                     result.to_csv("Decentralised " + agent.name + ".csv")
 
-                    result_info = pd.read_csv("order info.csv")
-                    info_features = [globals.nr_of_products, globals.grid_size, globals.order_size, globals.nr_of_agents]
-                    result_info["Order " + str(globals.order_number)] = info_features
-                    os.remove("order info.csv")
-                    result_info = result_info.rename_axis('index')
-                    result_info = result_info.drop(columns=["index"])
-                    result_info.to_csv("order info.csv")
+                    if globals.order_info:
+                        result_info = pd.read_csv("order info.csv")
+                        info_features = [globals.nr_of_products, globals.grid_size, globals.order_size, globals.nr_of_agents]
+                        result_info["Order " + str(globals.order_number)] = info_features
+                        os.remove("order info.csv")
+                        result_info = result_info.rename_axis('index')
+                        result_info = result_info.drop(columns=["index"])
+                        result_info.to_csv("order info.csv")
 
 
             print(agent.name, "statistics: ")
@@ -171,8 +172,8 @@ class Decentralised_grid(Grid):  # het logische grid
 
 
 class Centralised_grid(Grid):
-    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1, record_strats=False): #TODO: move strategy
-        super().__init__(item_to_pos_dict, size, cell_size=cell_size, record_stats=record_strats)
+    def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1, record_stats=False): #TODO: move strategy
+        super().__init__(item_to_pos_dict, size, cell_size=cell_size, record_stats=record_stats)
         self.working_agents = [following_agent.following_agent(self, agent_nr, capacity=agent_capacity) for agent_nr in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
         self.central_agents = [
             centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]

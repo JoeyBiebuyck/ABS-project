@@ -3,14 +3,10 @@ from utilities import strategies, util
 from grids import logic_grid, grid_classes
 
 
-#TODO initialize voor de bigdog en smaalbrain agents
-#TODO make it easy to switch between centralised and decentralised
-#TODO standaard testen maken voor de onderzoeksvraag
-#TODO counter voor de efficientie
-
 def play_and_show_grid():
     play_thread = threading.Thread(target=main_grid.play)
     play_thread.start()
+
 
 if __name__ == "__main__":
     grid_size = 5
@@ -30,4 +26,3 @@ if __name__ == "__main__":
     play_grid_thread.start()
 
     main_grid.grid_ui.mainloop()
-  #  my_print(main_grid.logic_grid)

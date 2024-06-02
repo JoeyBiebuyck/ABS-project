@@ -1,6 +1,0 @@
-
-
-class Agent(object):
-    def __init__(self):
-        self.grid = ...
-        self.name = ...

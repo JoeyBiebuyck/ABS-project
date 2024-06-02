@@ -4,22 +4,13 @@ from grids import logic_grid, grid_classes
 from utilities import strategies, util
 from grids import grid_classes, logic_grid
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-
-
-#TODO initialize voor de bigdog en smaalbrain agents
-#TODO make it easy to switch between centralised and decentralised
-#TODO standaard testen maken voor de onderzoeksvraag
-#TODO counter voor de efficientie
 
 def play_and_show_grid():
     play_thread = threading.Thread(target=main_grid.play)
     play_thread.start()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     grid_size = 5
     items = ["apple", "peach", "banana", "strawberry", "watermelon", "orange"]
     producten_lijst = [grid_classes.Product(items[i]) for i in range(6)]

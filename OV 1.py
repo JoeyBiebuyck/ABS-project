@@ -2,13 +2,16 @@ from utilities import globals, strategies, util, test_items
 from grids import logic_grid
 
 
-## UNCOMMENT IN DE PLAY VAN DE GRIDS ZODAT DE VISUAL WERKT
+# OV1: Is het mogelijk om het probleem op een gedecentraliseerde manier efficienter op te lossen dan op een gecentraliseerde manier?
+
+# Loop dat gebruikt werd om data te verzamelen voor de eerste onderzoeksvraag
+# Om deze te gebruiken moet de visual grid uitgeschakeld worden
 def iteratie_loop(lijst_van_paren, decentralised):
     # maak de initiele files
     grid_size = 5
-    util.init_stat_files(["Agent 0", "Agent 1"], decentralised)
+    util.init_stat_files(["Agent 0", "Agent 1"], decentralised)  # Initieer files om de informatie van agenten op te slagen
     if decentralised:
-        for order, item_dict in lijst_van_paren:
+        for order, item_dict in lijst_van_paren:  # voor elke order en plaatsing van items, genereer een grid en speel het af
             print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
             globals.order_number += 1
             print("current global order number: ", globals.order_number)
