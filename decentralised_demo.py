@@ -23,7 +23,6 @@ if __name__ == "__main__":
     main_grid.broadcast_order(order)
 
     if visuals:
-        # dit commenten om dan de grid gui uit te schakelen
         play_grid_thread = threading.Thread(target=play_and_show_grid)
         play_grid_thread.start()
         main_grid.grid_ui.mainloop()
