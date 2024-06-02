@@ -9,6 +9,7 @@ def play_and_show_grid():
 
 
 if __name__ == "__main__":
+    visuals = True
     grid_size = 5
     items = ["apple", "peach", "banana", "strawberry", "watermelon", "orange"]
     producten_lijst = [grid_classes.Product(items[i]) for i in range(6)]
@@ -22,7 +23,9 @@ if __name__ == "__main__":
     main_grid.broadcast_order(order)
     main_grid.broadcast_order(order2)
 
-    play_grid_thread = threading.Thread(target=play_and_show_grid)
-    play_grid_thread.start()
-
-    main_grid.grid_ui.mainloop()
+    if visuals:
+        play_grid_thread = threading.Thread(target=play_and_show_grid)
+        play_grid_thread.start()
+        main_grid.grid_ui.mainloop()
+    else:
+        main_grid.play()

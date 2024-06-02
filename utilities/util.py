@@ -2,8 +2,6 @@ import numpy as np
 import random
 import math
 import pandas as pd
-import threading
-from grids import logic_grid
 
 random.seed(1)
 
