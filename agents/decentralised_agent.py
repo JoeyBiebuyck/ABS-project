@@ -1,7 +1,6 @@
 import math
-import util
-import grid_classes
-import logic_grid
+from utilities import util
+from grids import logic_grid, grid_classes
 
 
 class Decentralised_agent(object):

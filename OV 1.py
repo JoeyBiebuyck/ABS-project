@@ -1,8 +1,6 @@
-import globals
-import util
-import logic_grid
-import test_items
-import strategies
+from utilities import globals, strategies, util, test_items
+from grids import logic_grid
+
 
 ## UNCOMMENT IN DE PLAY VAN DE GRIDS ZODAT DE VISUAL WERKT
 def iteratie_loop(lijst_van_paren, decentralised):

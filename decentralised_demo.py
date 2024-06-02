@@ -1,8 +1,8 @@
 import threading
-import strategies
-import util
-import grid_classes
-import logic_grid
+from utilities import strategies, util
+from grids import logic_grid, grid_classes
+from utilities import strategies, util
+from grids import grid_classes, logic_grid
 
 import matplotlib.pyplot as plt
 import seaborn as sns

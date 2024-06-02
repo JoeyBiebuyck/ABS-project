@@ -1,8 +1,9 @@
 # agent moet gwn kunnen moven dingen op pakken en depositten, de rest zou door de bigdog moeten bepaald worden?
 #zoals bijvoorbeeld wanneer te moeten oppakken of neerzetten.
-import logic_grid
-import grid_classes
-import util
+from grids import logic_grid, grid_classes
+from utilities import util
+
+
 class following_agent(object):
     def __init__(self, grid, name, capacity=2):
         self.starting_position: (int, int) = (-1, -1)  # is dezelfde locatie als het laadplatform, filler start positie

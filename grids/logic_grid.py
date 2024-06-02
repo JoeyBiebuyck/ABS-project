@@ -1,14 +1,11 @@
 import numpy as np
-import time
-import following_agent
-import util
-import grid_classes
-import decentralised_agent
-import centralised_agent
-import visual_grid
+from grids import grid_classes
+from agents import centralised_agent, decentralised_agent, following_agent
+from grids import visual_grid
 import pandas as pd
 import os
-import globals
+from utilities import globals, util
+
 
 class Grid(object):
     def __init__(self, item_to_pos_dict, size, cell_size=30, record_stats=False):
@@ -177,7 +174,8 @@ class Centralised_grid(Grid):
     def __init__(self, item_to_pos_dict, size, choose_strategy=util.random_action, move_strategy=util.astar, nr_of_agents=2, agent_capacity=2, cell_size=30, nr_of_centralised_agents=1, record_strats=False): #TODO: move strategy
         super().__init__(item_to_pos_dict, size, cell_size=cell_size, record_stats=record_strats)
         self.working_agents = [following_agent.following_agent(self, agent_nr, capacity=agent_capacity) for agent_nr in range(nr_of_agents)]  # init hier x agenten, (hier veronderstellen we dat het aantal agenten nooit groter zal zijn dan het aantal kolommen in de grid)
-        self.central_agents = [centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]
+        self.central_agents = [
+            centralised_agent.centralised_agent(self, self.working_agents, choose_strategy, move_strategy, name) for name in range(nr_of_centralised_agents)]
         self.init_agents()
         self.populate_grid()
 

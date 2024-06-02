@@ -1,7 +1,6 @@
-import util
-import grid_classes
+from grids import grid_classes
 import random
-import globals
+from utilities import globals, util
 
 random.seed(1)
 
@@ -19,7 +18,7 @@ def init_orders():
         coordinates = []
         while not len(coordinates) == len(items):
             new_pos = util.generate_random_coordinate(0, grid_size - 2, 0,
-                                                 grid_size - 1)  # onderste rij is gereserveerd voor load docks
+                                                      grid_size - 1)  # onderste rij is gereserveerd voor load docks
             if new_pos not in coordinates:
                 coordinates.append(new_pos)
 

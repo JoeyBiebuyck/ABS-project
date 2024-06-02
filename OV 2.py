@@ -1,8 +1,6 @@
-import util
-import logic_grid
-import globals
-import strategies
-import grid_classes
+from utilities import util, strategies, globals
+from grids import logic_grid, grid_classes
+
 import pandas as pd
 
 # welke maten kiezen we?
