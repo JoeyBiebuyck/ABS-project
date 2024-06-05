@@ -1,3 +1,5 @@
+# Grid Packing
+
 This project contains a simulation of the grid packing puzzle. It was build by J.Biebuyck, C.Monderen, O.Nolf.
 As there project for the course Agent Based Systems at VUB.
 
@@ -22,7 +24,8 @@ test_items.py contains 30 fixed orders, this way we could have the same orders f
 strategies.py contains some strategies agents can use to divide the items between themselves.
 globals.py contains some variables that should be accessible between multiple files for our data collection.
 
-How to run a simulation:
+### How to run a simulation:
+
 The file required_packages.py contains a script that installs al the necessary packages the run the simulations.
 
 To do a simulation you should run 1 of the two demo files:
