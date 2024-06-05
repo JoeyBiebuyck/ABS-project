@@ -61,7 +61,7 @@ class centralised_agent(object):
             elif self.grid.has_item(agent.current_position, list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als de agent op een positie staat waar een item is dat je nodig hebt, raap het op
                 self.make_pick_up(agent)
 
-            elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items
+            elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als de agent op zijn loading dock staat, deposit de items uit storage
                 self.make_deposit(agent)
 
             elif len(agent.appointed_items) == 0:  # als de agent alle items heeft, laat hem terug huis keren.
@@ -69,7 +69,7 @@ class centralised_agent(object):
                 self.make_move(agent, self.find_way_home(agent))
 
             else:
-                self.make_move(agent, self.select_next_product_and_position(agent))  # we bepalen naar waar de agent moet bewegen.
+                self.make_move(agent, self.select_next_product_and_position(agent))  # bepalen waar de agent naartoe moet bewegen.
 
     def next_order(self, agent): #laat een agent naar de volgende order gaan
         print("going to the next order")

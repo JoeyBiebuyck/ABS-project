@@ -25,7 +25,7 @@ for our analysis.
 
 ### How to run a simulation:
 
-The file _required_packages.py_ contains a script that installs al the necessary packages the run the simulations.
+The file _required_packages.py_ contains a script that installs all the necessary packages to run the simulations.
 
 To do a simulation you should run one of the demo files:
 - _decentralised_demo.py_ will run a simulation using the decentralised agents
