@@ -3,6 +3,8 @@ from sklearn.cluster import KMeans
 import random
 import numpy as np
 
+# Strategy 1 zal als er nog geen enkel item gereserveerd is, het dichtste item bij de agent terug geven.
+# Als er al een item gereserveerd is door een andere agent dan nemen we het item het verst van dat item.
 def strategy_1(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     location_available_items = []
     distance_to_available_items = []
@@ -26,11 +28,14 @@ def strategy_1(available, chosen_items, other_agent_choices, current_position, p
 
 
 
-# geeft een random item terug.
+# deze strategie zal elke keer een willekeurig item geven. Deze strategie kan enkel gebruikt worden om te vergelijken
+# aangezien alles willekeurig plaats vindt.
+
 def strategy_2(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy):
     random_item = random.choice(available)
     return random_item
 
+# strategie 3 zal dan elke keer het  dichtstbijzijnde item teruggeven.
 def strategy_3(available, chosen_items, other_agent_choices, current_position, product_locations_dictonairy): #neemt altijd het dichtste item bij het eerder gekozen item
     items_distance = {}
 
@@ -44,7 +49,8 @@ def strategy_3(available, chosen_items, other_agent_choices, current_position, p
 
     return closest_item
 
-
+# Deze strategie houdt rekening met de afstand tot andere agenten en afstancen tot de positie van items
+# het zal een 30-70% gewicht geven aan deze twee aftsanden en die te proberen te balanceren
 def strategy_balanced_proximity_avoidance(available, chosen_items, other_agent_choices, current_position,
                                           product_locations_dictionary):
     item_scores = {}
@@ -68,9 +74,11 @@ def strategy_balanced_proximity_avoidance(available, chosen_items, other_agent_c
     return best_item
 
 
-# proberen met k-means
+
 # gebruik maken van k-means om te kiezen hoeveel clusters we maken van de items
-# en we wijzen elke agent toe aan een cluster
+# en we wijzen elke agent toe aan een cluster.
+# Dus er worden clusters gemaakt van de available items en een agent wordt dan naar een cluster gestuurd.
+# Ageten worden allemaal naar andere clusters gestuurd.
 def strat_k_means(available, chosen_items, other_agent_choices, current_position, product_locations_dictionary):
     n_items = len(available)
     n_clusters = max(1, round(n_items / 3))
@@ -88,10 +96,3 @@ def strat_k_means(available, chosen_items, other_agent_choices, current_position
     return closest_item
 
 
-
-
-# manier waarop een item aan een agent gelinkt wordt
-# we kunnen nog een tweede
-
-# maak een strategie die random  items geeft aan agenten.
-# altijd het dichtstbijzijnde item nemen en dan daarvan het dichtstbijzijnde item (goed tegen clusters!)

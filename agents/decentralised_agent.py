@@ -5,7 +5,7 @@ from grids import logic_grid, grid_classes
 
 class Decentralised_agent(object):
     def __init__(self, grid, strategy, name, capacity=2):
-        self.starting_position: (int, int) = ...  # startpositie van de agent, is dezelfde locatie als het laadplatform, filler start positie  TODO als er een error is, zet de (-1, -1) terug
+        self.starting_position: (int, int) = ...  # startpositie van de agent, is dezelfde locatie als het laadplatform, filler start positie
         self.current_position: (int, int) = ...  # huidige positie van de agent, filler initiele positie
         self.other_agents: list[Decentralised_agent] = []  # lijst van pointers naar de andere agenten
         self.capacity = capacity  # de grootte van de opslagcapaciteit van de agent
@@ -63,7 +63,7 @@ class Decentralised_agent(object):
             self.nr_of_turns_depositing += 1
             self.deposit()
         elif len(self.chosen_items) == 0:  # als je alle items hebt, keer terug naar huis
-            print(self.name, "has retrieved all reserved items\n")
+            print(self.name, "has retrieved all reserved items")
             self.nr_of_turns_moving += 1
             self.move(self.return_home())
         else:  # beweeg richting de items dat je gereserveerd hebt
@@ -113,7 +113,7 @@ class Decentralised_agent(object):
             agent.available_items[self.current_order].remove(item)
 
     # Methode dat de agent naar next_pos verplaatst, als een agent in de weg is wordt er uitgeweken (dat is een conflict)
-    def move(self, next_pos):  # TODO is move right nog nodig als astar deftig werkt?
+    def move(self, next_pos):
         curr_pos_row, curr_pos_col = self.current_position
         next_pos_row, next_pos_col = next_pos
         if util.adjacent(self.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
@@ -137,7 +137,7 @@ class Decentralised_agent(object):
 
     # Methode dat een pad construeert en de beste positie geeft
     # returned de beste next position en roept de move methode op
-    def select_next_product_and_position(self): #TODO is het altijd het beste om eerst naar het dichste product te gaan?
+    def select_next_product_and_position(self):
         print("selecting move")
         pos_chosen_items = []
         distance_to_available_items = []

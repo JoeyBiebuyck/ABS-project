@@ -78,51 +78,6 @@ class Decentralised_grid(Grid):  # het logische grid
             print(f"Added {agent.name} at position ({row}, {col}) with loading dock")
         print("")
 
-    def replace_agents(self, new_agents, old_agents):  # Methode die kapotte agents verwijdert en toevoegt (agent weg en toe voegen) TODO: moet aan de nieuwe uitbreidingen aangepast worden
-        starting_positions = []
-        current_positions = []
-        old_choices = []
-
-        for agent in old_agents:
-            self.agents.remove(agent)  # haal de agent weg uit de lijst agenten
-            curr_row, curr_col = agent.current_position
-            starting_row, starting_col = agent.starting_position
-            starting_positions.append((starting_row, starting_col))  # sla zijn startpositie op
-            current_positions.append((curr_row, curr_col))  # sla zijn huidige positie op
-            old_choices.append(agent.chosen_items)  # alle items dat hij op zich had gaan verloren, onthou welke hij gereserveerd had
-            self.logic_grid[curr_row][curr_col].agent = None
-            self.logic_grid[starting_row][starting_col].loading_dock = None
-
-        if self.init_on_curr_pos:  # bepaald of je nieuwe agenten initialiseert op een startpositie of op de huidige locatie van een verwijderde agent
-            positions = zip(starting_positions, current_positions)
-            for agent in new_agents:
-                self.agents.append(agent)
-                if not len(positions) == 0:  # safety check
-                    starting_pos, current_pos = positions.pop()
-                    agent.starting_position = starting_pos
-                    agent.current_position = current_pos
-                    starting_row, starting_col = starting_pos
-                    curr_row, curr_col = current_pos
-                    self.logic_grid[starting_row][starting_col].loading_dock = grid_classes.Loading_Dock(agent, agent.starting_position)
-                    self.logic_grid[curr_row][curr_col].agent = agent
-        else:
-            positions = starting_positions
-            for agent in new_agents:
-                self.agents.append(agent)
-                if not len(positions) == 0:  # safety check
-                    starting_pos = positions.pop()
-                    agent.starting_position = starting_pos
-                    agent.current_position = agent.starting_position
-                    starting_row, starting_col = starting_pos
-                    self.logic_grid[starting_row][starting_col].loading_dock = grid_classes.Loading_Dock(agent, agent.starting_position)
-                    self.logic_grid[starting_row][starting_col].agent = agent
-
-        for agent in self.agents:
-            other_agents = self.agents.copy()
-            other_agents.remove(agent)
-            agent.other_agents = other_agents
-            agent.available[agent.current_order] += old_choices  # voeg de gedepositte items toe aan de available items
-
     # Methode die aan elke agent de informatie over een nieuwe bestelling geeft
     def broadcast_order(self, order):
         self.nr_of_orders += 1
@@ -136,11 +91,12 @@ class Decentralised_grid(Grid):  # het logische grid
             agent.agent_choices[agent.highest_order] = []
             agent.available_items[agent.highest_order] = order.copy()
 
-    def play(self):  # roept play op bij elke agent
+    # Methode die om de beurt elke agent toelaat een keuze te maken over wat ze gaan doen
+    def play(self):
         while self.running:
             for agent in self.agents:
                 agent.play()
-            self.grid_ui.update_ui(self.logic_grid)  #TODO: uncomment als je wil dat de grid werkt
+            self.grid_ui.update_ui(self.logic_grid)  # comment/uncomment om de visualgrid uit/aan te zetten
             time.sleep(0.1)
         if not self.running:  # Geeft de statistieken van elke agent terug als alle bestellingen behandeld zijn
             for agent in self.agents:
@@ -221,6 +177,7 @@ class Centralised_grid(Grid):
             central_agent.agent_choices[central_agent.highest_order] = []
             central_agent.available_items[central_agent.highest_order] = order.copy()
 
+    # Methode die om de beurt elke agent toelaat een keuze te maken over wat ze gaan doen
     def play(self):
         while self.running:
             for central_agent in self.central_agents:

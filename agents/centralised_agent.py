@@ -1,6 +1,3 @@
-#TODO add centralised agent
-#TODO implement centralised agent
-#TODO heel veel van de functies kunnen naar util verhuizen???
 import math
 from utilities import util
 from agents import following_agent
@@ -44,7 +41,7 @@ class centralised_agent(object):
                 print("succes! all orders fulfilled\n")
                 self.grid.stop()
 
-            elif len(self.developing_orders[self.current_order])==0: #als de huidige order voldaan is, ga naar de volgende
+            elif len(self.developing_orders[self.current_order])==0: #als de huidige order voldaan is, ga naar de volgende (centralised agent)
                 self.nr_of_next_order += 1
                 self.current_order = self.current_order + 1
 
@@ -54,7 +51,7 @@ class centralised_agent(object):
                 print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
 
             elif (agent.capacity > len(agent.appointed_items) and len(available) != 0
-                  and len(agent.storage) == 0):  # als je nog items kan "reserveren" van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+                  and len(agent.storage) == 0):  #Als de agent nieuwe items kan worden toegewezen van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
                 self.nr_of_turns_choosing += 1
                 self.appoint_item(agent)
 

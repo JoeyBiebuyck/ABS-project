@@ -8,8 +8,7 @@ random.seed(1)
 # Genereert 30 orders zodat bij OV1 de performantie berekent word voor dezelfde bestellingen en plaatsingen van items
 def init_orders(grid_size=5, order_len=6, nr_of_examples=30):
     items = ["apple", "banana", "orange", "grapes", "strawberry", "watermelon", "pineapple", "mango", "kiwi", "pear",
-             "cherry", "blueberry", "peach", "plum", "lemon", "lime", "avocado", "coconut", "pomegranate",
-             "raspberry"]
+             "cherry", "blueberry", "peach", "plum", "lemon", "lime", "avocado", "coconut", "pomegranate", "raspberry"]
     producten_lijst = [grid_classes.Product(items[i]) for i in range(order_len)]
 
     for _ in range(nr_of_examples):  # Voor elk voorbeeld

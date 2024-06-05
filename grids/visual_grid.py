@@ -1,7 +1,8 @@
 import random
 import tkinter as tk
 
-class GridUI(tk.Tk):  # voor de visualisatie
+# Dit zorgt voor de visualisatie van het grid.
+class GridUI(tk.Tk):
     def __init__(self, size, cell_size):
         super().__init__()
         self.size = size
@@ -11,8 +12,9 @@ class GridUI(tk.Tk):  # voor de visualisatie
         self.draw_grid()
         self.images = {}  # als dictionary initialiseren
 
-        #self.canvas.bind("<Button-1>", self.move_up)
 
+    # aan de hand van deze methode voegen we fotos (png) naar de grid voor de visualisatie.
+    # het zorgt er ook voor dat deze png files gescaled worden om in de vakjes van de grid te passen.
     def add_image_to_grid(self, row, col, image_path):
 
         if row < 0 or row >= self.size or col < 0 or col >= self.size:
@@ -47,7 +49,9 @@ class GridUI(tk.Tk):  # voor de visualisatie
                 y1 = y0 + self.cell_size
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
-
+    # deze methode zal een voor een elke cell inlezen van de logic grid en dit mappen op de logic grid.
+    # Op deze manier zorgen we ervoor dat alle operaties op de logische grid plaatsvinden en dat dit automatisch
+    # gemapt wordt op de visuele representatie van de grid.
     def update_ui(self, logic_grid):
 
         # Redraw grid

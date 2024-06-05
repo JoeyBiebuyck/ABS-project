@@ -56,7 +56,7 @@ def astar(grid, start, goal):
     while True:
         if not agenda.empty():
             current_pos, path, cost = agenda.serve()
-            if not current_pos in visited:
+            if current_pos not in visited:
                 visited.append(current_pos)
                 if current_pos == goal:
                     if len(path) == 0:  # als er het pad 1 lang is, en er staat een agent op de goal, geef de huidige positie terug (de start positie) zodat de agent niet beweegt
@@ -102,14 +102,14 @@ def adjacent(pos1, pos2):
     return (abs(row1 - row2) <= 1 ^ abs(col1 - col2) <= 1) or pos1 == pos2
 
 
-# Functie die berekent of een coordinaat out of bounds is voor een gegeven grid size
+# Functie die berekent of een coördinaat out of bounds is voor een gegeven grid size
 def out_of_bounds(coordinate, size):
     if not coordinate == 0:
         row, col = coordinate
         return row < 0 or row > size-1 or col < 0 or col > size-1
 
 
-# Functie die een random coordinaat genereert op basis van de minimale en maximale waarden
+# Functie dat een random coördinaat genereert op basis van de minimale en maximale waarden
 def generate_random_coordinate(min_row, max_row, min_col, max_col): # bouwt item to position dictionary
     row = random.randint(min_row, max_row)
     col = random.randint(min_col, max_col)
@@ -128,7 +128,7 @@ def generate_order(lijst_van_producten, length_of_order=6, unique=False):
         return random.sample(lijst_van_producten, length_of_order)
 
 
-# Functie die een product -> coordinate dictionary genereert
+# Functie die een product->coordinate dictionary genereert
 def build_dictionary(lijst_van_producten, grid_size):  # bouwt item to position dictionary
     dict = {}
     taken_pos: list[(int, int)] = []
@@ -147,23 +147,6 @@ def build_dictionary(lijst_van_producten, grid_size):  # bouwt item to position 
 def adjacent_positions(position):
     row, col = position
     return [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]
-
-
-# Functie die alle valid moves voor een agent genereert TODO: doe deze 2 weg?
-def valid_moves(agent, grid):
-    row = 0
-    col = 1
-    return filter(lambda position: adjacent(position, agent.current_position)
-                                   and grid.logic_grid[position[row]][position[col]].agent is None
-                                   and not out_of_bounds(position, grid.size),
-                  adjacent_positions(agent.current_position))
-
-
-def distance_to_item_score(distance):
-    if distance == 0:
-        return 100
-    else:
-        return max(0, 50 - distance)
 
 
 # Initialiseer de files voor data collectie voor agenten bij OV1 & OV2

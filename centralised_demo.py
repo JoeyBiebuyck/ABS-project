@@ -18,8 +18,6 @@ if __name__ == "__main__":
     order = util.generate_order(producten_lijst, unique=True)
     order2 = util.generate_order(producten_lijst, unique=True)
     main_grid = logic_grid.Centralised_grid(item_dict, grid_size, choose_strategy=strategies.strategy_1, move_strategy= util.astar, nr_of_agents=2)
-    main_grid.init_agents()
-    main_grid.populate_grid()
     main_grid.broadcast_order(order)
     main_grid.broadcast_order(order2)
 
