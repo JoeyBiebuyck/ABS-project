@@ -4,8 +4,8 @@ from grids import logic_grid
 
 # OV1: Is het mogelijk om het probleem op een gedecentraliseerde manier efficienter op te lossen dan op een gecentraliseerde manier?
 
-# Loop dat gebruikt werd om data te verzamelen voor de eerste onderzoeksvraag
-# Om deze te gebruiken moet de visual grid uitgeschakeld worden
+# Loop die gebruikt werd om data te verzamelen voor de eerste onderzoeksvraag
+# Om deze te gebruiken moet het visual grid uitgeschakeld worden
 def iteratie_loop(lijst_van_paren, decentralised):
     # maak de initiele files
     grid_size = 5

@@ -40,6 +40,7 @@ def manhattandistance(a, b):
 
 
 # Functie die de neighbours van een positie berekent, is nodig voor A-star. (basically een successor functie)
+# Kijkt of er een agent is of als het out of bounds is.
 def neighbours(loc, grid, goal):
    return filter(lambda coordinate: grid.logic_grid[coordinate[0]][coordinate[1]].agent is None or coordinate == goal,
                  filter(lambda coordinate: not out_of_bounds(coordinate, grid.size),
