@@ -4,7 +4,7 @@ As there project for the course Agent Based Systems at VUB.
 Grid packing is a puzzel where agents have to collaborate to retrieve, items in an order, from a grid and bring them to a loading dock.
 The goal is for these agents is the fulfill these orders as efficiently as possible.
 
-We have used two types of methods to make this collaboration happen.
+We have used two types of methods to make the collaboration happen.
 A decentralised agent, which communicates with the other agents to decide who retrieves witch item and
 a centralised agent, that does al the decision-making and then sends commands to a few following agents.
 These agent classes can be found in the directory agents.
