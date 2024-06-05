@@ -51,27 +51,27 @@ class centralised_agent(object):
                 print("cannot do anything else, he is waiting for the other agent to finish collecting items\n")
 
             elif (agent.capacity > len(agent.appointed_items) and len(available) != 0
-                  and len(agent.storage) == 0):  #Als de agent nieuwe items kan worden toegewezen van de huidige order, doe dat, storage == 0 check zodat je eerst alles deposit
+                  and len(agent.storage) == 0):  #Als de agent nieuwe items kan worden toegewezen van de huidige order, doe dat, storage == 0 check zodat eerst alles gedeposit wordt.
                 self.nr_of_turns_choosing += 1
                 self.appoint_item(agent)
 
-            elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # als je items kan reserveren, maar de huidige available is leeg, ga naar next order en doe het opnieuw
+            elif self.highest_order > agent.current_order and agent.capacity > len(agent.appointed_items) and len(available) == 0 and len(agent.storage) == 0:  # Als de agent nieuwe items kan worden toegewezen, maar de huidige available is leeg, ga naar next order en doe het opnieuw
                 self.next_order(agent)
 
-            elif self.grid.has_item(agent.current_position, list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als je op een positie bent waar een item is dat je nodig hebt, raap het op
+            elif self.grid.has_item(agent.current_position, list(map(lambda tuple: tuple[0], agent.appointed_items))):  # als de agent op een positie staat waar een item is dat je nodig hebt, raap het op
                 self.make_pick_up(agent)
 
             elif self.grid.is_loading_dock(agent.current_position, agent) and len(agent.storage) != 0:  # als je op je loading dock bent, deposit je items
                 self.make_deposit(agent)
 
-            elif len(agent.appointed_items) == 0:  # als je alle items hebt keer terug naar huis
+            elif len(agent.appointed_items) == 0:  # als de agent alle items heeft, laat hem terug huis keren.
                 print(agent.name, "has retrieved all appointed items\n")
                 self.make_move(agent, self.find_way_home(agent))
 
             else:
                 self.make_move(agent, self.select_next_product_and_position(agent))  # we bepalen naar waar de agent moet bewegen.
 
-    def next_order(self, agent):
+    def next_order(self, agent): #laat een agent naar de volgende order gaan
         print("going to the next order")
         print("available items are:", list(map(lambda item: item.name, self.available_items[agent.current_order])))
         print("other agent choices are:", list(map(lambda item: item.name, self.agent_choices[agent.current_order])),"\n")
@@ -87,7 +87,7 @@ class centralised_agent(object):
         agent.appointed_items.append((item, self.current_order))
         print(item.name, "was chosen\n")
 
-    def make_move(self, agent, next_pos):
+    def make_move(self, agent, next_pos): # laat een agent naar een positie bewegen
         next_pos_row, next_pos_col = next_pos
         if util.adjacent(agent.current_position, next_pos) and self.grid.logic_grid[next_pos_row][next_pos_col].agent is None:
             # als er geen agent is gaan we gwn naar de volgende positie
@@ -100,16 +100,16 @@ class centralised_agent(object):
         else:
             print("!!!error not adjacent!!!")
 
-    def make_pick_up(self, agent):
+    def make_pick_up(self, agent): # laat een agent een item oppakken
         agent.pick_up()
 
-    def make_deposit(self,agent):
+    def make_deposit(self,agent): # laat een agent zij storage legen
         item, order_nr = agent.deposit()
         print(" deposit item: ", item.name)
         print("order_nr deposit: ", order_nr)
         self.developing_orders[order_nr].remove(item)
 
-    def find_way_home(self,agent):
+    def find_way_home(self,agent): # bepaald de weg naar het loading dock voor een agent.
         print("returning home!!!")
         print("current returning position is: ", agent.current_position)
         return_path = self.move_strategy(self.grid, agent.current_position, agent.starting_position)
@@ -117,7 +117,7 @@ class centralised_agent(object):
         print("going to: ", next_pos, "\n")
         return next_pos
 
-    def select_next_product_and_position(self, agent):
+    def select_next_product_and_position(self, agent): # Bepaald het item om te gaan halen en hoe er te raken
         # construeert pad en geeft de beste next position weer
         # returns de beste next position en roept de move methode op.
         print("selecting move")

@@ -94,5 +94,3 @@ def strat_k_means(available, chosen_items, other_agent_choices, current_position
                        key=lambda item: np.linalg.norm(np.array(product_locations_dictionary[item]) - current_position))
 
     return closest_item
-
-

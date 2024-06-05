@@ -28,4 +28,3 @@ if __name__ == "__main__":
         main_grid.grid_ui.mainloop()
     else:
         main_grid.play()
-
