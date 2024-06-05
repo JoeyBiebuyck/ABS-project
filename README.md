@@ -32,5 +32,5 @@ To do a simulation you should run one of the demo files:
 - _centralised_demo.py_ will run a simulation using the decentralised agents
 
 There are two files, OV1.py and OV2.py, and two directories, /Data OV1/ and /Data OV2/, left. These were used to collect the data for our research questions.
-_OV1.py_ contains a loop that tests the efficiency of the centralised and decentralised agents. Data OV 1 contains the gathered data.
-_OV2.py_ contains a loop that runs the decentralised implementation with different combinations of parameters. Data OV 2 contains the gathered data.
+_OV1.py_ contains a loop that tests the efficiency of the centralised and decentralised agents. /Data OV 1/ contains the gathered data.
+_OV2.py_ contains a loop that runs the decentralised implementation with different combinations of parameters. /Data OV 2/ contains the gathered data.
