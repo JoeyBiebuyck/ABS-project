@@ -1,6 +1,0 @@
-index,row names,Order 1,Order 2,Order 3,Order 4,Order 5,Order 6,Order 7,Order 8,Order 9,Order 10,Order 11,Order 12,Order 13,Order 14,Order 15,Order 16,Order 17,Order 18,Order 19,Order 20,Order 21,Order 22,Order 23,Order 24,Order 25,Order 26,Order 27,Order 28,Order 29,Order 30
-0,Turns choosing,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6
-1,turns waiting,17,15,0,11,14,6,11,9,5,15,17,2,11,9,15,11,9,3,9,7,15,17,9,8,21,5,11,7,3,19
-2,number of conflicts,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0
-3,times going to next order,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-4,total amount of turns,76,72,64,56,70,64,64,52,48,68,76,56,60,56,72,64,56,48,56,56,68,72,56,62,84,52,64,56,48,76
